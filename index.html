@@ -59,6 +59,19 @@
   #log div{padding:3px 0;border-bottom:1px solid var(--line)}
   aside{display:flex;flex-direction:column;gap:20px}
   footer{text-align:center;color:var(--muted);font-size:12px;padding:16px}
+  /* heat map */
+  .heat-wrap{display:grid;grid-template-columns:2fr 1fr;gap:16px;align-items:start}
+  .heat-wrap h3{font-family:Rajdhani,sans-serif;margin:0 0 8px;font-size:16px;color:var(--muted);letter-spacing:1px;
+    display:flex;justify-content:space-between;align-items:center;gap:8px}
+  .heat-wrap h3 span{font-family:Inter,sans-serif;font-size:12px;letter-spacing:0}
+  .heat-canvas{width:100%;aspect-ratio:4/3;border-radius:8px;background:#000;display:block}
+  .legend{display:flex;flex-direction:column;gap:8px;font-size:13px;color:var(--muted);margin-top:12px}
+  .sw{display:inline-block;width:12px;height:12px;border-radius:3px;margin-right:8px;vertical-align:middle}
+  .zone-stats{display:grid;grid-template-columns:1fr 1fr;gap:8px}
+  .zone-stats div{background:var(--panel2);border-radius:8px;padding:8px;text-align:center;font-size:11px;color:var(--muted);text-transform:uppercase}
+  .zone-stats b{display:block;font-family:Rajdhani,sans-serif;font-size:28px;color:var(--text)}
+  .heat-side button{width:100%;margin-top:12px;font-size:14px;padding:8px}
+  @media(max-width:900px){.heat-wrap{grid-template-columns:1fr}}
   @media(max-width:900px){main{grid-template-columns:1fr}.brand h1{font-size:28px}.logo-slot{width:100px;height:55px}}
 </style>
 </head>
@@ -103,6 +116,33 @@
         <button id="btnSnap" disabled>SNAPSHOT</button>
         <input type="file" id="imgInput" accept="image/*" hidden>
       </div>
+    </div>
+
+    <div class="card" style="margin-top:20px">
+      <h2>WEED &amp; CROP HEAT MAP</h2>
+      <div class="heat-wrap">
+        <div>
+          <h3>CAMERA VIEW ZONES <span id="heatScans">0 scans</span></h3>
+          <canvas id="heatCam" class="heat-canvas"></canvas>
+        </div>
+        <div class="heat-side">
+          <h3>ZONE SUMMARY</h3>
+          <div class="zone-stats">
+            <div><b id="zWeed" style="color:#ff4d5e">0</b>Weed zones</div>
+            <div><b id="zMix" style="color:#ff9f2e">0</b>Mixed zones</div>
+            <div><b id="zCrop" style="color:#4ade80">0</b>Crop zones</div>
+            <div><b id="zClean">–</b>Weed-free</div>
+          </div>
+          <div class="legend">
+            <span><i class="sw" style="background:#ff4d5e"></i>Weeds</span>
+            <span><i class="sw" style="background:#ff9f2e"></i>Mixed — crops &amp; weeds together</span>
+            <span><i class="sw" style="background:#4ade80"></i>Crops only</span>
+            <span><i class="sw" style="background:#2a3830"></i>Nothing detected yet</span>
+          </div>
+          <button id="btnHeatReset">RESET HEAT MAP</button>
+        </div>
+      </div>
+      <p style="font-size:12px;color:var(--muted);margin:10px 0 0">Every scan adds its detections to the zone where they were seen. Brighter zones = detected more often. The number is how many times.</p>
     </div>
   </section>
 
@@ -295,7 +335,9 @@ async function inferOnce(){
   if (!res.ok) throw new Error('Roboflow '+res.status+': '+(await res.text()).slice(0,120));
   const data = await res.json();
   $('latency').textContent = Math.round(performance.now()-t0)+' ms';
-  return (data.predictions||[]).map(p=>({...p, x:p.x/scale, y:p.y/scale, width:p.width/scale, height:p.height/scale}));
+  const preds = (data.predictions||[]).map(p=>({...p, x:p.x/scale, y:p.y/scale, width:p.width/scale, height:p.height/scale}));
+  heatRecord(preds, vw, vh);
+  return preds;
 }
 async function loop(){
   while (detecting && stream){
@@ -425,6 +467,59 @@ document.addEventListener('keydown', e => {
     e.preventDefault(); scanNow();
   }
 });
+
+/* ---------- heat map dashboard ---------- */
+const HC = 8, HR = 6;                       // zone grid over the camera view
+const COL = {weed:'#ff4d5e', mixed:'#ff9f2e', crop:'#4ade80'};
+const heatCv = $('heatCam'), hctx = heatCv.getContext('2d');
+const bgCv = document.createElement('canvas'), bgctx = bgCv.getContext('2d');
+let camHeat = [], heatScans = 0;
+
+function zoneStatus(w,c){ return w && c ? 'mixed' : w ? 'weed' : c ? 'crop' : 'none'; }
+function resetCamHeat(){ camHeat = Array.from({length:HC*HR}, ()=>({w:0,c:0})); heatScans = 0; bgCv.width = 0; }
+
+function heatRecord(preds, vw, vh){
+  heatScans++;
+  bgCv.width = grab.width; bgCv.height = grab.height; bgctx.drawImage(grab, 0, 0);   // last scanned frame
+  preds.forEach(p=>{
+    const cx = Math.min(HC-1, Math.max(0, Math.floor(p.x/vw*HC)));
+    const cy = Math.min(HR-1, Math.max(0, Math.floor(p.y/vh*HR)));
+    const z = camHeat[cy*HC + cx];
+    if (isWeed(p.class)) z.w++; else z.c++;
+  });
+  renderCamHeat();
+}
+function renderCamHeat(){
+  let zw=0, zm=0, zc=0;
+  camHeat.forEach(z=>{ const st=zoneStatus(z.w,z.c); if(st==='weed')zw++; else if(st==='mixed')zm++; else if(st==='crop')zc++; });
+  const found = zw+zm+zc;
+  $('zWeed').textContent = zw; $('zMix').textContent = zm; $('zCrop').textContent = zc;
+  $('zClean').textContent = found ? Math.round(100*zc/found) + '%' : '–';
+  $('heatScans').textContent = heatScans + (heatScans===1 ? ' scan' : ' scans');
+
+  const r = heatCv.getBoundingClientRect(); if (!r.width) return;
+  heatCv.width = r.width*devicePixelRatio; heatCv.height = r.height*devicePixelRatio;
+  const W = heatCv.width, H = heatCv.height, cw = W/HC, ch = H/HR;
+  hctx.fillStyle = '#000'; hctx.fillRect(0,0,W,H);
+  if (bgCv.width){ hctx.globalAlpha = .4; hctx.drawImage(bgCv,0,0,W,H); hctx.globalAlpha = 1; }
+  const max = Math.max(1, ...camHeat.map(z=>z.w+z.c));
+  hctx.font = `bold ${12*devicePixelRatio}px Inter, sans-serif`; hctx.textAlign = 'center'; hctx.textBaseline = 'middle';
+  camHeat.forEach((z,i)=>{
+    const x = (i%HC)*cw, y = Math.floor(i/HC)*ch, t = z.w + z.c;
+    if (t){
+      hctx.fillStyle = COL[zoneStatus(z.w,z.c)]; hctx.globalAlpha = .3 + .55*(t/max);
+      hctx.fillRect(x+1, y+1, cw-2, ch-2); hctx.globalAlpha = 1;
+      hctx.fillStyle = '#fff'; hctx.fillText(t, x+cw/2, y+ch/2);
+    }
+    hctx.strokeStyle = 'rgba(255,255,255,.1)'; hctx.strokeRect(x, y, cw, ch);
+  });
+  if (!heatScans){ hctx.fillStyle = '#8fa596'; hctx.fillText('Scan to build the heat map', W/2, H/2); }
+}
+$('btnHeatReset').onclick = () => { resetCamHeat(); renderCamHeat(); log('Heat map reset'); };
+try{ localStorage.removeItem('bioguard_field'); }catch(e){}
+resetCamHeat();
+requestAnimationFrame(renderCamHeat);
+window.addEventListener('resize', renderCamHeat);
 
 listCameras();
 </script>
