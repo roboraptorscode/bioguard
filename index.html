@@ -1,820 +1,432 @@
-<title>BIOGUARD</title>
-<meta name="claude:viewport-fit-sides" content="cover">
-<link rel="preconnect" href="https://fonts.googleapis.com">
-<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wght@12..96,600;12..96,800&family=Atkinson+Hyperlegible:wght@400;700&family=JetBrains+Mono:wght@400;600&display=swap">
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>BioGuard Vision</title>
+<link href="https://fonts.googleapis.com/css2?family=Rajdhani:wght@500;700&family=Inter:wght@400;600&display=swap" rel="stylesheet">
 <style>
-/* Layout: night-field control room. Header band with logo slots, live feed (left) + field dashboard (right), model guide below.
-   Single committed dark look: BIOGLOW = bioluminescence, so the page glows against a night ecosystem. */
-:root {
-  color-scheme: dark;
-  --night: #061419;
-  --night-2: #0a1f27;
-  --panel: #0e2730;
-  --panel-2: #12323d;
-  --line: #1f4a56;
-  --ink: #e4f3ef;
-  --ink-2: #9cbfb8;
-  --glow-cyan: #4ff0d8;
-  --glow-violet: #b495ff;
-  --glow-amber: #ffd36b;
-  --crop: #3ddc84;
-  --partial: #ff9f1c;
-  --weed: #ff4d5e;
-  --soil: #5b4a3c;
-  --f-display: "Bricolage Grotesque", "Avenir Next", "Segoe UI", system-ui, sans-serif;
-  --f-body: "Atkinson Hyperlegible", "Segoe UI", system-ui, sans-serif;
-  --f-mono: "JetBrains Mono", ui-monospace, "SFMono-Regular", Menlo, monospace;
-  --r: 14px;
-}
-* { box-sizing: border-box; }
-html, body { background: var(--night); color: var(--ink); }
-body {
-  font-family: var(--f-body);
-  font-size: 15px;
-  line-height: 1.5;
-  min-height: 100%;
-  background:
-    radial-gradient(60rem 30rem at 10% -10%, color-mix(in srgb, var(--glow-cyan) 14%, transparent), transparent 70%),
-    radial-gradient(50rem 26rem at 95% 0%, color-mix(in srgb, var(--glow-violet) 16%, transparent), transparent 70%),
-    radial-gradient(40rem 30rem at 50% 110%, color-mix(in srgb, var(--crop) 8%, transparent), transparent 70%),
-    var(--night);
-  background-attachment: fixed;
-}
-.wrap {
-  max-width: 1280px;
-  margin: 0 auto;
-  padding-left: max(16px, env(safe-area-inset-left, 0px));
-  padding-right: max(16px, env(safe-area-inset-right, 0px));
-}
-
-/* ---------- Header ---------- */
-header { padding-block: 22px 8px; }
-.head { display: flex; flex-wrap: wrap; gap: 20px; align-items: center; justify-content: space-between; }
-.brand { display: flex; flex-direction: column; gap: 4px; min-width: 0; }
-.season {
-  font-family: var(--f-mono); font-size: 12px; letter-spacing: .12em; text-transform: uppercase;
-  color: var(--glow-cyan);
-}
-.season b { color: var(--glow-violet); font-weight: 600; }
-h1 {
-  font-family: var(--f-display); font-weight: 800; margin: 0;
-  font-size: clamp(42px, 7vw, 76px); line-height: .95; letter-spacing: -.02em;
-  background: linear-gradient(100deg, var(--glow-cyan) 0%, var(--crop) 38%, var(--glow-amber) 70%, var(--glow-violet) 100%);
-  -webkit-background-clip: text; background-clip: text; color: transparent;
-  filter: drop-shadow(0 0 22px color-mix(in srgb, var(--glow-cyan) 35%, transparent));
-}
-.tagline { color: var(--ink-2); max-width: 56ch; margin: 4px 0 0; text-wrap: balance; }
-.logos { display: flex; gap: 12px; flex-wrap: wrap; }
-.logo-slot {
-  width: 150px; height: 96px; border-radius: var(--r);
-  border: 1.5px dashed var(--line); background: color-mix(in srgb, var(--panel) 70%, transparent);
-  color: var(--ink-2); font: 600 12px/1.3 var(--f-body); text-align: center;
-  display: grid; place-items: center; padding: 10px; cursor: pointer; position: relative; overflow: hidden;
-}
-.logo-slot:hover, .logo-slot:focus-visible { border-color: var(--glow-cyan); color: var(--ink); outline: none; }
-.logo-slot img { max-width: 100%; max-height: 100%; object-fit: contain; }
-.logo-slot.filled { border-style: solid; background: #fff; }
-.logo-slot .plus { display: block; font-size: 22px; color: var(--glow-cyan); line-height: 1; margin-bottom: 4px; }
-
-/* ---------- Main grid ---------- */
-main { padding-block: 18px 40px; display: grid; gap: 18px; }
-.grid { display: grid; grid-template-columns: minmax(0, 1.55fr) minmax(0, 1fr); gap: 18px; align-items: start; }
-@media (max-width: 920px) { .grid { grid-template-columns: minmax(0, 1fr); } }
-.panel {
-  background: linear-gradient(180deg, var(--panel-2), var(--panel));
-  border: 1px solid var(--line); border-radius: calc(var(--r) + 4px);
-  padding: 16px; min-width: 0;
-}
-.panel h2 {
-  font-family: var(--f-display); font-weight: 600; font-size: 19px; margin: 0;
-  display: flex; align-items: center; gap: 10px; text-wrap: balance;
-}
-.label { font-family: var(--f-mono); font-size: 11px; letter-spacing: .1em; text-transform: uppercase; color: var(--ink-2); }
-
-/* Feed */
-.feed-head { display: flex; flex-wrap: wrap; gap: 10px; align-items: center; justify-content: space-between; margin-bottom: 12px; }
-.live-dot { width: 9px; height: 9px; border-radius: 50%; background: var(--weed); box-shadow: 0 0 10px var(--weed); }
-.paused .live-dot { background: var(--ink-2); box-shadow: none; }
-.seg { display: inline-flex; flex-wrap: wrap; gap: 4px; background: var(--night-2); border: 1px solid var(--line); border-radius: 999px; padding: 4px; }
-.seg button { border-radius: 999px; }
-button, .btn {
-  font: 700 13px/1 var(--f-body); color: var(--ink); cursor: pointer;
-  background: transparent; border: 1px solid transparent; padding: 9px 14px; border-radius: 10px;
-}
-button:focus-visible, select:focus-visible, input:focus-visible { outline: 2px solid var(--glow-cyan); outline-offset: 2px; }
-.seg button[aria-pressed="true"] { background: var(--glow-cyan); color: var(--night); }
-.btn-ghost { border-color: var(--line); background: var(--night-2); }
-.btn-ghost:hover { border-color: var(--glow-cyan); }
-.btn-glow { background: var(--glow-violet); color: var(--night); }
-.btn-glow:hover { filter: brightness(1.08); }
-
-.stage {
-  position: relative; border-radius: var(--r); overflow: hidden; background: #000;
-  border: 1px solid var(--line);
-  box-shadow: 0 0 0 1px color-mix(in srgb, var(--glow-cyan) 20%, transparent), 0 18px 50px -20px color-mix(in srgb, var(--glow-cyan) 45%, transparent);
-}
-#view { display: block; width: 100%; height: auto; max-width: 100%; }
-.hud {
-  position: absolute; left: 10px; top: 10px; display: flex; gap: 6px; flex-wrap: wrap;
-  font: 600 11px/1 var(--f-mono); letter-spacing: .06em;
-}
-.hud span { background: rgba(4, 16, 20, .78); color: var(--ink); padding: 6px 8px; border-radius: 6px; border: 1px solid var(--line); }
-.notice {
-  margin-top: 10px; padding: 10px 12px; border-radius: 10px; font-size: 14px;
-  background: color-mix(in srgb, var(--partial) 14%, var(--night-2)); border: 1px solid color-mix(in srgb, var(--partial) 50%, transparent);
-}
-.controls { display: grid; grid-template-columns: repeat(auto-fit, minmax(180px, 1fr)); gap: 12px 16px; margin-top: 14px; }
-.ctrl { display: flex; flex-direction: column; gap: 6px; min-width: 0; }
-.ctrl output { font-family: var(--f-mono); color: var(--glow-cyan); font-size: 12px; }
-.ctrl-row { display: flex; justify-content: space-between; align-items: baseline; gap: 8px; }
-input[type="range"] { width: 100%; accent-color: var(--glow-cyan); }
-select {
-  font: 600 14px var(--f-body); color: var(--ink); background: var(--night-2);
-  border: 1px solid var(--line); border-radius: 10px; padding: 8px 10px; width: 100%;
-}
-.claude-row { display: flex; flex-wrap: wrap; gap: 10px; align-items: center; margin-top: 14px; padding: 12px; border-radius: 12px; background: color-mix(in srgb, var(--glow-violet) 8%, var(--night-2)); border: 1px solid color-mix(in srgb, var(--glow-violet) 45%, transparent); }
-.claude-row button:disabled { opacity: .55; cursor: progress; }
-.rf-box { display: grid; gap: 12px; margin-top: 14px; padding: 12px; border-radius: 12px; background: color-mix(in srgb, var(--glow-cyan) 7%, var(--night-2)); border: 1px solid color-mix(in srgb, var(--glow-cyan) 40%, transparent); }
-.rf-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(220px, 1fr)); gap: 12px 16px; }
-input[type="text"], input[type="password"] { font: 14px var(--f-mono); color: var(--ink); background: var(--night); border: 1px solid var(--line); border-radius: 10px; padding: 9px 10px; width: 100%; min-width: 0; }
-.rf-debug summary { cursor: pointer; }
-.rf-debug pre { margin: 8px 0 0; max-height: 220px; overflow: auto; font: 11px/1.45 var(--f-mono); color: var(--ink-2); background: var(--night); border: 1px solid var(--line); border-radius: 8px; padding: 10px; white-space: pre-wrap; overflow-wrap: anywhere; }
-.legend { display: flex; flex-wrap: wrap; gap: 14px; margin-top: 12px; font-size: 13px; color: var(--ink-2); }
-.legend i { display: inline-block; width: 12px; height: 12px; border-radius: 3px; margin-right: 6px; vertical-align: -1px; }
-
-/* Dashboard */
-.dash { display: grid; gap: 14px; }
-.status {
-  display: flex; align-items: center; gap: 16px; padding: 16px; border-radius: var(--r);
-  background: var(--night-2); border: 1px solid var(--line); transition: border-color .3s;
-}
-.lamp {
-  flex: none; width: 64px; height: 64px; border-radius: 50%;
-  background: radial-gradient(circle at 35% 30%, #fff8 0, transparent 35%), var(--lamp, var(--crop));
-  box-shadow: 0 0 0 6px color-mix(in srgb, var(--lamp, var(--crop)) 22%, transparent), 0 0 36px var(--lamp, var(--crop));
-  transition: background .3s, box-shadow .3s;
-}
-.status-text { min-width: 0; }
-.status-text strong { display: block; font-family: var(--f-display); font-size: 24px; line-height: 1.1; color: var(--lamp, var(--crop)); }
-.status-text span { color: var(--ink-2); font-size: 14px; }
-
-.counts { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 10px; }
-.count { padding: 12px; border-radius: 12px; background: var(--night-2); border: 1px solid var(--line); border-top: 3px solid var(--c); min-width: 0; }
-.count .n { font: 600 30px/1 var(--f-mono); font-variant-numeric: tabular-nums; color: var(--c); margin: 6px 0 4px; }
-.count .p { font: 400 12px var(--f-mono); color: var(--ink-2); font-variant-numeric: tabular-nums; }
-.bar { height: 6px; border-radius: 3px; background: var(--panel); margin-top: 8px; overflow: hidden; }
-.bar > div { height: 100%; width: 0; background: var(--c); transition: width .3s; }
-
-.spray { padding: 14px; border-radius: 12px; background: var(--night-2); border: 1px solid var(--line); display: grid; gap: 10px; }
-.spray-big { display: flex; align-items: baseline; gap: 10px; flex-wrap: wrap; }
-.spray-big .n { font: 600 34px/1 var(--f-mono); color: var(--glow-amber); font-variant-numeric: tabular-nums; }
-.spray-meter { display: flex; height: 12px; border-radius: 6px; overflow: hidden; background: var(--panel); }
-.spray-meter div { transition: width .3s; }
-.spray small { color: var(--ink-2); }
-
-.stats { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 6px 14px; font-size: 13px; }
-.stats div { display: flex; justify-content: space-between; gap: 8px; border-bottom: 1px dashed var(--line); padding-block: 4px; min-width: 0; }
-.stats dd { margin: 0; font-family: var(--f-mono); font-variant-numeric: tabular-nums; color: var(--ink); text-align: right; overflow-wrap: anywhere; }
-.stats dt { color: var(--ink-2); }
-
-.log { list-style: none; margin: 0; padding: 0; display: grid; gap: 6px; max-height: 210px; overflow-y: auto; }
-.log li { font: 12px/1.4 var(--f-mono); padding: 7px 9px; border-radius: 8px; background: var(--night-2); border-left: 3px solid var(--c, var(--line)); overflow-wrap: anywhere; }
-.log time { color: var(--ink-2); margin-right: 6px; }
-
-/* Model guide */
-.guide { display: grid; grid-template-columns: minmax(0, 1.1fr) minmax(0, 1fr); gap: 18px; }
-@media (max-width: 920px) { .guide { grid-template-columns: minmax(0, 1fr); } }
-.guide p, .guide li { color: var(--ink-2); max-width: 66ch; }
-.guide strong { color: var(--ink); }
-.steps { margin: 10px 0 0; padding-left: 22px; display: grid; gap: 6px; }
-.pick { border: 1px solid color-mix(in srgb, var(--glow-violet) 55%, transparent); background: color-mix(in srgb, var(--glow-violet) 8%, var(--night-2)); border-radius: var(--r); padding: 14px; display: grid; gap: 8px; }
-.tag { display: inline-block; font: 600 11px var(--f-mono); letter-spacing: .08em; text-transform: uppercase; color: var(--night); background: var(--glow-violet); padding: 3px 8px; border-radius: 999px; width: fit-content; }
-.model-state { font: 12px var(--f-mono); color: var(--glow-cyan); overflow-wrap: anywhere; }
-code { font-family: var(--f-mono); font-size: .92em; color: var(--glow-amber); }
-footer { padding-block: 0 30px; color: var(--ink-2); font-size: 13px; }
-@media (prefers-reduced-motion: reduce) { * { transition: none !important; } }
+  :root{
+    --bg:#0d1410; --panel:#16201a; --panel2:#1d2a22; --line:#2c3d32;
+    --text:#e8f1ea; --muted:#8fa596; --accent:#5ee08a; --accent2:#2fb35f;
+    --weed:#ff4d5e; --crop:#4ade80; --warn:#ffc048;
+  }
+  *{box-sizing:border-box}
+  body{margin:0;background:var(--bg);color:var(--text);font-family:Inter,system-ui,sans-serif}
+  header{display:flex;align-items:center;justify-content:space-between;gap:16px;
+    padding:14px 24px;background:linear-gradient(90deg,#132019,#0f1a14);border-bottom:2px solid var(--accent2)}
+  .logo-slot{width:150px;height:70px;border:2px dashed var(--line);border-radius:10px;display:flex;
+    align-items:center;justify-content:center;cursor:pointer;overflow:hidden;color:var(--muted);
+    font-size:12px;text-align:center;background:var(--panel);flex-shrink:0;position:relative}
+  .logo-slot:hover{border-color:var(--accent)}
+  .logo-slot img{max-width:100%;max-height:100%;object-fit:contain}
+  .logo-slot.filled{border-style:solid;border-color:transparent;background:transparent}
+  .brand{text-align:center;flex:1}
+  .brand h1{margin:0;font-family:Rajdhani,sans-serif;font-size:40px;letter-spacing:3px;color:var(--accent)}
+  .brand p{margin:2px 0 0;color:var(--muted);font-size:13px;letter-spacing:1px;text-transform:uppercase}
+  main{display:grid;grid-template-columns:1fr 340px;gap:20px;padding:20px 24px;max-width:1500px;margin:auto}
+  .card{background:var(--panel);border:1px solid var(--line);border-radius:12px;padding:16px}
+  .card h2{margin:0 0 12px;font-family:Rajdhani,sans-serif;font-size:20px;letter-spacing:1px;color:var(--accent)}
+  .stage{position:relative;width:100%;aspect-ratio:4/3;background:#000;border-radius:10px;overflow:hidden}
+  .stage video,.stage canvas,.stage img{position:absolute;inset:0;width:100%;height:100%;object-fit:contain}
+  .stage.drag{outline:3px dashed var(--accent);outline-offset:-6px}
+  .stage .idle{position:absolute;inset:0;display:flex;align-items:center;justify-content:center;
+    color:var(--muted);font-size:15px;text-align:center;padding:20px}
+  .status-bar{display:flex;flex-wrap:wrap;gap:16px;margin-top:12px;font-size:13px;color:var(--muted)}
+  .dot{display:inline-block;width:10px;height:10px;border-radius:50%;background:#555;margin-right:6px;vertical-align:middle}
+  .dot.live{background:var(--accent);box-shadow:0 0 8px var(--accent)}
+  .dot.err{background:var(--weed)}
+  .controls{display:flex;gap:10px;margin-top:14px;flex-wrap:wrap}
+  button{font-family:Rajdhani,sans-serif;font-weight:700;font-size:16px;letter-spacing:1px;border:none;
+    border-radius:8px;padding:10px 18px;cursor:pointer;background:var(--panel2);color:var(--text);border:1px solid var(--line)}
+  button.primary{background:var(--accent2);color:#04120a;border-color:var(--accent2)}
+  button.danger{background:var(--weed);color:#fff;border-color:var(--weed)}
+  button:disabled{opacity:.4;cursor:not-allowed}
+  label{display:block;font-size:12px;color:var(--muted);margin:10px 0 4px;text-transform:uppercase;letter-spacing:.5px}
+  input,select{width:100%;padding:8px 10px;background:var(--panel2);border:1px solid var(--line);border-radius:6px;color:var(--text);font-size:14px}
+  input[type=range]{padding:0}
+  .row{display:flex;gap:10px}.row>div{flex:1}
+  .stats{display:grid;grid-template-columns:1fr 1fr;gap:10px}
+  .stat{background:var(--panel2);border-radius:10px;padding:12px;text-align:center}
+  .stat .n{font-family:Rajdhani,sans-serif;font-size:42px;font-weight:700;line-height:1}
+  .stat .l{font-size:12px;color:var(--muted);text-transform:uppercase;margin-top:4px}
+  .stat.weed .n{color:var(--weed)} .stat.crop .n{color:var(--crop)}
+  .alert{margin-top:12px;padding:10px;border-radius:8px;text-align:center;font-family:Rajdhani,sans-serif;
+    font-weight:700;font-size:18px;letter-spacing:1px;background:var(--panel2);color:var(--muted)}
+  .alert.on{background:rgba(255,77,94,.15);color:var(--weed);border:1px solid var(--weed)}
+  .alert.ok{background:rgba(74,222,128,.12);color:var(--crop);border:1px solid var(--crop)}
+  #log{max-height:180px;overflow:auto;font-family:monospace;font-size:12px;color:var(--muted)}
+  #log div{padding:3px 0;border-bottom:1px solid var(--line)}
+  aside{display:flex;flex-direction:column;gap:20px}
+  footer{text-align:center;color:var(--muted);font-size:12px;padding:16px}
+  @media(max-width:900px){main{grid-template-columns:1fr}.brand h1{font-size:28px}.logo-slot{width:100px;height:55px}}
 </style>
+</head>
+<body>
 
 <header>
-  <div class="wrap head">
-    <div class="brand">
-      <div class="season">FIRST LEGO League · <b>BIOGLOW</b> 2026–2027 · Innovation Project</div>
-      <h1>BIOGUARD</h1>
-      <p class="tagline">A robot eye for the field. BIOGUARD scans crop rows, finds weeds plant by plant, and sprays only where it has to, so farms use far less herbicide.</p>
-    </div>
-    <div class="logos">
-      <button class="logo-slot" id="slot-fll" type="button" aria-label="Add FIRST LEGO League logo">
-        <span><span class="plus">+</span>FIRST LEGO League logo</span>
-      </button>
-      <button class="logo-slot" id="slot-team" type="button" aria-label="Add Roboraptors team logo">
-        <span><span class="plus">+</span>Roboraptors logo</span>
-      </button>
-      <input type="file" id="logo-input" accept="image/*" hidden>
-    </div>
+  <div class="logo-slot" id="slotLeft" title="Click to add RoboRaptor logo">
+    <span>+ RoboRaptor<br>Logo</span>
   </div>
+  <div class="brand">
+    <h1>BIOGUARD</h1>
+    <p>Robot Vision · Weed &amp; Crop Detection</p>
+  </div>
+  <div class="logo-slot" id="slotRight" title="Click to add FIRST LEGO League logo">
+    <span>+ FIRST LEGO<br>League Logo</span>
+  </div>
+  <input type="file" id="logoInput" accept="image/*" hidden>
 </header>
 
-<main class="wrap">
-  <div class="grid">
-    <!-- Live feed -->
-    <section class="panel" id="feed-panel" aria-labelledby="feed-title">
-      <div class="feed-head">
-        <h2 id="feed-title"><span class="live-dot"></span> Field camera</h2>
-        <div class="seg" role="group" aria-label="Image source">
-          <button type="button" id="src-camera" aria-pressed="false">Live camera</button>
-          <button type="button" id="src-upload" aria-pressed="false">Upload photo / video</button>
-        </div>
-        <input type="file" id="media-input" accept="image/*,video/*" hidden>
+<main>
+  <section>
+    <div class="card">
+      <h2 id="stageTitle">LIVE ROBOT CAMERA</h2>
+      <div class="stage" id="stage">
+        <video id="video" autoplay playsinline muted></video>
+        <img id="still" alt="Uploaded field image" hidden>
+        <canvas id="overlay"></canvas>
+        <div class="idle" id="idle">Camera off — press START CAMERA, or UPLOAD IMAGE (you can also drag a photo here)</div>
       </div>
-
-      <div class="stage">
-        <canvas id="view" width="640" height="480" aria-label="Camera view with weed detection overlay"></canvas>
-        <div class="hud"><span id="hud-src">NO SOURCE</span><span id="hud-engine">SMART LOGIC</span><span id="hud-fps">— scans/s</span></div>
+      <div class="status-bar">
+        <span><span class="dot" id="camDot"></span>Camera: <b id="camStatus">off</b></span>
+        <span><span class="dot" id="aiDot"></span>AI: <b id="aiStatus">idle</b></span>
+        <span>Speed: <b id="fps">0</b> frames/s</span>
+        <span>Latency: <b id="latency">–</b></span>
+        <span>Scans used: <b id="scans">0</b></span>
       </div>
-      <div class="notice" id="notice" hidden></div>
-
       <div class="controls">
-        <div class="ctrl">
-          <label class="label" for="engine">Vision AI engine</label>
-          <select id="engine">
-            <option value="rows">Smart Logic (rows + colour, no training)</option>
-            <option value="claude" disabled>Claude Vision (in the published Claude page)</option>
-            <option value="roboflow">Roboflow model (your trained workflow)</option>
-            <option value="tm" disabled>Teachable Machine model (load below)</option>
-          </select>
-        </div>
-        <div class="ctrl">
-          <div class="ctrl-row"><label class="label" for="cols">Scan grid</label><output id="cols-out">8 columns</output></div>
-          <input type="range" id="cols" min="5" max="14" value="8">
-        </div>
-        <div class="ctrl">
-          <div class="ctrl-row"><label class="label" for="sens">Green sensitivity</label><output id="sens-out">0.10</output></div>
-          <input type="range" id="sens" min="0.02" max="0.30" step="0.01" value="0.10">
-        </div>
-        <div class="ctrl">
-          <div class="ctrl-row"><label class="label" for="band">Crop row width</label><output id="band-out">7%</output></div>
-          <input type="range" id="band" min="3" max="15" value="7">
-        </div>
-      </div>
-      <div class="rf-box" id="rf-row" hidden>
-        <div class="rf-grid">
-          <div class="ctrl">
-            <label class="label" for="rf-workflow">Roboflow workflow</label>
-            <input type="text" id="rf-workflow" spellcheck="false" autocomplete="off" value="shivanis-workspace-jn90g/workflows/crop-and-weed-concept-test-1793586758435">
-          </div>
-          <div class="ctrl">
-            <label class="label" for="rf-key">API key (saved only in this browser)</label>
-            <input type="password" id="rf-key" autocomplete="off" placeholder="Paste your Roboflow API key">
-          </div>
-          <div class="ctrl">
-            <label class="label" for="rf-mode">When to scan</label>
-            <select id="rf-mode">
-              <option value="1000">Every 1 second</option>
-              <option value="3000">Every 3 seconds (saves credits)</option>
-              <option value="manual">Only when I press Scan now</option>
-            </select>
-          </div>
-          <div class="ctrl">
-            <div class="ctrl-row"><label class="label" for="rf-conf">Min. confidence</label><output id="rf-conf-out">40%</output></div>
-            <input type="range" id="rf-conf" min="10" max="90" value="40">
-          </div>
-        </div>
-        <div style="display:flex; gap:10px; align-items:center; flex-wrap:wrap">
-          <button type="button" class="btn-glow" id="rf-scan">Scan now</button>
-          <span class="model-state" id="rf-state">Paste your API key, then start the camera.</span>
-        </div>
-        <div class="model-state" id="rf-classes"></div>
-        <details class="rf-debug"><summary class="label">Roboflow reply (for troubleshooting)</summary><pre id="rf-raw">No reply yet.</pre></details>
-      </div>
-      <div class="claude-row" id="claude-row" hidden>
-        <button type="button" class="btn-glow" id="ask-claude">Analyze this frame with Claude</button>
-        <button type="button" class="btn-ghost" id="back-live" hidden>Back to live</button>
-        <span class="model-state" id="claude-state">Claude looks at one frame at a time and labels every zone.</span>
-      </div>
-      <div class="feed-head" style="margin: 14px 0 0">
-        <div class="legend" aria-label="Colour key">
-          <span><i style="background:var(--crop)"></i>Green = crop</span>
-          <span><i style="background:var(--partial)"></i>Orange = partial weed</span>
-          <span><i style="background:var(--weed)"></i>Red = weed</span>
-        </div>
-        <div style="display:flex; gap:8px; flex-wrap:wrap">
-          <button type="button" class="btn-ghost" id="pause">Pause</button>
-        </div>
-      </div>
-    </section>
-
-    <!-- Dashboard -->
-    <aside class="panel dash" aria-labelledby="dash-title">
-      <h2 id="dash-title">Field dashboard</h2>
-      <div class="status" id="status">
-        <div class="lamp" aria-hidden="true"></div>
-        <div class="status-text"><strong id="status-title">Waiting for camera</strong><span id="status-sub">Start the live camera or upload a field photo or video.</span></div>
-      </div>
-
-      <div class="counts">
-        <div class="count" style="--c: var(--crop)"><div class="label">Crop</div><div class="n" id="n-crop">0</div><div class="p" id="p-crop">0% of plants</div><div class="bar"><div id="b-crop"></div></div></div>
-        <div class="count" style="--c: var(--partial)"><div class="label">Partial</div><div class="n" id="n-partial">0</div><div class="p" id="p-partial">0% of plants</div><div class="bar"><div id="b-partial"></div></div></div>
-        <div class="count" style="--c: var(--weed)"><div class="label">Weed</div><div class="n" id="n-weed">0</div><div class="p" id="p-weed">0% of plants</div><div class="bar"><div id="b-weed"></div></div></div>
-      </div>
-
-      <div class="spray">
-        <div class="label">Targeted spray plan</div>
-        <div class="spray-big"><span class="n" id="saved">0%</span><span>less herbicide than spraying the whole frame</span></div>
-        <div class="spray-meter" aria-hidden="true">
-          <div id="m-weed" style="background:var(--weed)"></div>
-          <div id="m-partial" style="background:var(--partial)"></div>
-          <div id="m-rest" style="background:var(--panel-2); flex:1"></div>
-        </div>
-        <small id="spray-text">Spray 0 of 0 zones.</small>
-      </div>
-
-      <dl class="stats">
-        <div><dt>Engine</dt><dd id="s-engine">Smart Logic</dd></div>
-        <div><dt>Method</dt><dd id="s-rows">—</dd></div>
-        <div><dt>Zones scanned</dt><dd id="s-zones">—</dd></div>
-        <div><dt>Scan time</dt><dd id="s-ms">—</dd></div>
-      </dl>
-
-      <div>
-        <div class="label" style="margin-bottom:8px">Detection log</div>
-        <ol class="log" id="log"></ol>
-      </div>
-    </aside>
-  </div>
-
-  <!-- Model guide -->
-  <section class="panel guide" aria-labelledby="ai-title">
-    <div>
-      <h2 id="ai-title">Which Vision AI model should BIOGUARD use?</h2>
-      <p><strong>Smart Logic (built in)</strong> works with no training. It finds plants by how green each pixel is (the Excess Green index, <code>ExG = 2G − R − B</code>). If it sees two or more clear crop rows, plants in the rows are crop and plants between rows are weeds. If there are no rows, it compares leaf colour instead: the most common plant colour is treated as the crop and a clearly different colour as weed. If every plant looks alike, it calls them all crop rather than guessing. It is quick but rough, because many weeds are the same green as the crop.</p>
-      <p><strong>Claude Vision</strong> actually recognizes plants. It looks at one frame, names the crop, and labels every zone. It runs only in the published Claude page, so use it with uploaded field photos or videos. It is slower (a few seconds per frame) and uses your Claude plan.</p>
-      <p><strong>For live camera scanning, train your own model.</strong> A Teachable Machine model learns what your crop and your weeds look like, then runs on every frame in real time, even in the downloaded file.</p>
-      <p><strong>Next level:</strong> a small object-detection model such as Ultralytics YOLO (nano size) trained on public weed datasets like DeepWeeds or CropAndWeed draws a box around each plant. It needs Python and a GPU to train, so it's a good stretch goal for the team's research.</p>
-    </div>
-    <div class="pick">
-      <span class="tag">Recommended</span>
-      <h2>Google Teachable Machine (TensorFlow.js)</h2>
-      <p style="margin:0">Free, no code, trains in the browser, and runs inside this page. Each scan zone is cut out and sent to the model, which answers Crop, Partial weed or Weed.</p>
-      <ol class="steps">
-        <li>Take 100+ close-up photos for each class: <code>Crop</code>, <code>Partial weed</code>, <code>Weed</code> (add <code>Soil</code> too if you like).</li>
-        <li>Make an Image Project at teachablemachine.withgoogle.com and train it.</li>
-        <li>Export → TensorFlow.js → Download. You get <code>model.json</code>, <code>weights.bin</code> and <code>metadata.json</code>.</li>
-        <li>Load all three files here, then pick the model in the engine menu.</li>
-      </ol>
-      <div style="display:flex; gap:10px; align-items:center; flex-wrap:wrap">
-        <button type="button" class="btn-glow" id="load-model">Load model files</button>
-        <input type="file" id="model-input" accept=".json,.bin" multiple hidden>
-        <span class="model-state" id="model-state">No model loaded</span>
+        <button class="primary" id="btnCam">START CAMERA</button>
+        <button class="primary" id="btnScan" disabled title="Shortcut: Space bar">📷 SCAN NOW</button>
+        <button id="btnDetect" disabled title="Scans continuously — uses many credits">AUTO SCAN</button>
+        <button id="btnUpload">UPLOAD IMAGE</button>
+        <button id="btnSnap" disabled>SNAPSHOT</button>
+        <input type="file" id="imgInput" accept="image/*" hidden>
       </div>
     </div>
   </section>
+
+  <aside>
+    <div class="card">
+      <h2>FIELD REPORT</h2>
+      <div class="stats">
+        <div class="stat weed"><div class="n" id="weedCount">0</div><div class="l">Weeds</div></div>
+        <div class="stat crop"><div class="n" id="cropCount">0</div><div class="l">Crops</div></div>
+      </div>
+      <div class="alert" id="alert">WAITING</div>
+    </div>
+
+    <div class="card">
+      <h2>SETTINGS</h2>
+      <label>Camera</label>
+      <select id="camSelect"><option value="">Default camera</option></select>
+
+      <label>Paste Roboflow model URL</label>
+      <input id="modelUrl" placeholder="https://app.roboflow.com/team/project/3">
+      <div id="urlMsg" style="font-size:12px;margin-top:4px;color:var(--muted)">Fills Model ID &amp; Version automatically</div>
+
+      <label>Roboflow API Key</label>
+      <input id="apiKey" type="password" placeholder="Your Roboflow API key">
+
+      <div class="row">
+        <div><label>Model ID</label><input id="modelId" placeholder="e.g. weed-crop-detection"></div>
+        <div style="flex:.45"><label>Version</label><input id="modelVer" placeholder="1" value="1"></div>
+      </div>
+
+      <label>Inference Server</label>
+      <select id="endpoint">
+        <option value="https://serverless.roboflow.com">Roboflow Serverless (cloud)</option>
+        <option value="https://detect.roboflow.com">Roboflow Hosted API (cloud)</option>
+        <option value="http://localhost:9001">Local Inference Server (:9001)</option>
+      </select>
+
+      <label>Confidence: <b id="confVal">50</b>%</label>
+      <input type="range" id="conf" min="10" max="95" value="50">
+
+      <label>Weed class names (comma separated)</label>
+      <input id="weedNames" value="weed">
+    </div>
+
+    <div class="card">
+      <h2>DETECTION LOG</h2>
+      <div id="log"></div>
+    </div>
+  </aside>
 </main>
 
-<footer class="wrap">Team Roboraptors · BIOGUARD · Built for the FIRST LEGO League BIOGLOW season.</footer>
+<footer>BioGuard · Team RoboRaptor · FIRST LEGO League</footer>
+
+<canvas id="grab" hidden></canvas>
 
 <script>
-(() => {
-  const $ = (s) => document.querySelector(s);
-  const css = getComputedStyle(document.documentElement);
-  const COL = { crop: css.getPropertyValue('--crop').trim(), partial: css.getPropertyValue('--partial').trim(), weed: css.getPropertyValue('--weed').trim(), cyan: css.getPropertyValue('--glow-cyan').trim() };
+const $ = id => document.getElementById(id);
+const video = $('video'), overlay = $('overlay'), ctx = overlay.getContext('2d');
+const grab = $('grab'), gctx = grab.getContext('2d');
+let stream = null, detecting = false, lastPreds = [], frames = 0, fpsTimer = performance.now();
+const still = $('still');
+let scans = 0, scanning = false;
+let mode = 'none'; // 'camera' or 'image'
+function src(){
+  return mode === 'image'
+    ? {el:still, w:still.naturalWidth, h:still.naturalHeight}
+    : {el:video, w:video.videoWidth, h:video.videoHeight};
+}
 
-  const view = $('#view'), vctx = view.getContext('2d');
-  const small = document.createElement('canvas'), sctx = small.getContext('2d', { willReadFrequently: true });
-  const video = document.createElement('video');
-  video.muted = true; video.playsInline = true; video.loop = true; video.setAttribute('playsinline', '');
+/* ---------- saved settings ---------- */
+const store = {
+  get(k){ try{ return localStorage.getItem('bioguard_'+k); }catch(e){ return null; } },
+  set(k,v){ try{ localStorage.setItem('bioguard_'+k, v); }catch(e){} }
+};
+['apiKey','modelId','modelVer','endpoint','conf','weedNames'].forEach(id=>{
+  const v = store.get(id); if (v !== null) $(id).value = v;
+  $(id).addEventListener('change', ()=> store.set(id, $(id).value));
+});
+$('confVal').textContent = $('conf').value;
+$('conf').oninput = () => { $('confVal').textContent = $('conf').value; store.set('conf',$('conf').value); };
 
-  const S = { source: 'none', paused: false, cols: 8, sens: 0.10, band: 7, engine: 'rows' };
-  let stream = null, upImg = null;
-  let result = null, lastScan = 0, busy = false, scans = [], tm = null, tmLabels = [], lastLogKey = '';
+/* ---------- model URL parser ---------- */
+function parseModelUrl(raw){
+  raw = raw.trim(); if (!raw) return null;
+  let u; try{ u = new URL(raw.includes('://') ? raw : 'https://x.invalid/'+raw); }catch(e){ return null; }
+  const parts = u.pathname.split('/').filter(Boolean);
+  const host = u.hostname, out = {key: u.searchParams.get('api_key')};
+  if (/^(detect|serverless|outline|classify)\.roboflow\.com$/.test(host)){
+    out.endpoint = 'https://' + host; out.model = parts[0]; out.ver = parts[1];
+  } else if (/(app|universe)\.roboflow\.com$/.test(host)){
+    out.model = parts[1];                                   // /workspace/project/...
+    out.ver = [...parts].reverse().find(p => /^\d+$/.test(p));
+  } else if (host === 'localhost' || host === '127.0.0.1'){
+    out.endpoint = u.origin; out.model = parts[0]; out.ver = parts[1];
+  } else {                                                  // plain "project/3"
+    out.model = parts[0]; out.ver = parts[1];
+  }
+  return out.model ? out : null;
+}
+function applyModelUrl(){
+  const msg = $('urlMsg'), r = parseModelUrl($('modelUrl').value);
+  if (!$('modelUrl').value.trim()){ msg.style.color='var(--muted)'; msg.textContent='Fills Model ID & Version automatically'; return; }
+  if (!r){ msg.style.color='var(--weed)'; msg.textContent='Could not read that URL — copy it from the browser address bar of your model page'; return; }
+  const set = (id,v) => { if (v){ $(id).value = v; store.set(id, v); } };
+  set('modelId', r.model); set('modelVer', r.ver); set('apiKey', r.key);
+  if (r.endpoint && [...$('endpoint').options].some(o=>o.value===r.endpoint)) set('endpoint', r.endpoint);
+  msg.style.color='var(--crop)';
+  msg.textContent = `✓ Model: ${r.model}  ·  Version: ${r.ver || '(not in URL — type it)'}${r.key ? '  ·  API key found' : ''}`;
+  log('Model set from URL: '+r.model+'/'+(r.ver||'?'));
+}
+$('modelUrl').addEventListener('input', applyModelUrl);
 
-  /* ---------- Sizing ---------- */
-  function size(w, h) {
-    const W = 640, Hh = Math.max(240, Math.min(960, Math.round(W * h / w)));
-    if (view.width !== W || view.height !== Hh) { view.width = W; view.height = Hh; }
-    if (small.width !== 320 || small.height !== Math.round(Hh / 2)) { small.width = 320; small.height = Math.round(Hh / 2); }
-  }
+/* ---------- logo slots ---------- */
+let activeSlot = null;
+function setLogo(slot, src){
+  slot.innerHTML = ''; const img = new Image(); img.src = src; slot.appendChild(img); slot.classList.add('filled');
+}
+['slotLeft','slotRight'].forEach(id=>{
+  const saved = store.get(id); if (saved) setLogo($(id), saved);
+  $(id).onclick = () => { activeSlot = id; $('logoInput').click(); };
+});
+$('logoInput').onchange = e => {
+  const f = e.target.files[0]; if (!f) return;
+  const r = new FileReader();
+  r.onload = () => { setLogo($(activeSlot), r.result); store.set(activeSlot, r.result); };
+  r.readAsDataURL(f); e.target.value = '';
+};
 
-  /* ---------- Smart Logic engine: crop rows first, leaf colour as fallback ---------- */
-  function vegMask(d, n, sens) {
-    const m = new Uint8Array(n);
-    for (let i = 0, j = 0; i < n; i++, j += 4) { const R = d[j], G = d[j + 1], B = d[j + 2], s = R + G + B + 1; m[i] = ((2 * G - R - B) / s > sens && G > 35) ? 1 : 0; }
-    return m;
-  }
-  function grid(w, h) { const cols = S.cols, tw = w / cols, rows = Math.max(1, Math.round(h / tw)); return { cols, rows, tw, th: h / rows }; }
-  function findRows(mask, w, h) {
-    const prof = new Float32Array(w);
-    for (let y = 0; y < h; y++) for (let x = 0; x < w; x++) prof[x] += mask[y * w + x];
-    for (let x = 0; x < w; x++) prof[x] /= h;
-    const k = Math.max(2, Math.round(w / 40)), sm = new Float32Array(w);
-    for (let x = 0; x < w; x++) { let a = 0, c = 0; for (let i = -k; i <= k; i++) { const xx = x + i; if (xx >= 0 && xx < w) { a += prof[xx]; c++; } } sm[x] = a / c; }
-    const mean = sm.reduce((a, b) => a + b, 0) / w;
-    if (mean < 0.01) return [];
-    const thr = Math.max(mean * 1.5, 0.08), cand = [];
-    for (let x = 1; x < w - 1; x++) if (sm[x] >= sm[x - 1] && sm[x] >= sm[x + 1] && sm[x] > thr) cand.push(x);
-    cand.sort((a, b) => sm[b] - sm[a]);
-    const peaks = [], gap = w * 0.12;
-    for (const x of cand) if (peaks.every((p) => Math.abs(p - x) > gap)) peaks.push(x);
-    peaks.sort((a, b) => a - b);
-    // Real rows: at least two, with clearly emptier ground between them
-    if (peaks.length < 2) return [];
-    for (let i = 0; i < peaks.length - 1; i++) {
-      let lo = Infinity; for (let x = peaks[i]; x <= peaks[i + 1]; x++) lo = Math.min(lo, sm[x]);
-      if (lo > 0.6 * Math.min(sm[peaks[i]], sm[peaks[i + 1]])) return [];
-    }
-    return peaks;
-  }
-  // Two-colour split of plant pixels (lighting-independent chroma). Biggest group = crop.
-  function colourSplit(d, mask, n) {
-    const pts = [];
-    for (let i = 0; i < n; i += 2) if (mask[i]) { const j = i * 4, s = d[j] + d[j + 1] + d[j + 2] + 1; pts.push([d[j] / s, d[j + 1] / s]); }
-    if (pts.length < 60) return null;
-    const dist = (a, b) => Math.hypot(a[0] - b[0], a[1] - b[1]);
-    let c1 = pts.reduce((a, p) => p[0] < a[0] ? p : a, pts[0]), c2 = pts.reduce((a, p) => dist(p, c1) > dist(a, c1) ? p : a, pts[0]);
-    c1 = [...c1]; c2 = [...c2];
-    let n1 = 0, n2 = 0;
-    for (let it = 0; it < 10; it++) {
-      const s1 = [0, 0], s2 = [0, 0]; n1 = 0; n2 = 0;
-      for (const p of pts) { if (dist(p, c1) <= dist(p, c2)) { s1[0] += p[0]; s1[1] += p[1]; n1++; } else { s2[0] += p[0]; s2[1] += p[1]; n2++; } }
-      if (n1) c1 = [s1[0] / n1, s1[1] / n1]; if (n2) c2 = [s2[0] / n2, s2[1] / n2];
-    }
-    const minority = Math.min(n1, n2) / pts.length;
-    if (dist(c1, c2) < 0.035 || minority < 0.04) return { split: false };
-    const crop = n1 >= n2 ? c1 : c2, other = n1 >= n2 ? c2 : c1;
-    return { split: true, isCrop: (j) => { const s = d[j] + d[j + 1] + d[j + 2] + 1, p = [d[j] / s, d[j + 1] / s]; return dist(p, crop) <= dist(p, other); } };
-  }
-  function analyzeRows() {
-    const w = small.width, h = small.height, d = sctx.getImageData(0, 0, w, h).data;
-    const mask = vegMask(d, w * h, S.sens), peaks = findRows(mask, w, h), half = w * S.band / 100;
-    let method, isCrop;
-    if (peaks.length) {
-      const inBand = new Uint8Array(w); peaks.forEach((p) => { for (let x = Math.max(0, Math.floor(p - half)); x < Math.min(w, Math.ceil(p + half)); x++) inBand[x] = 1; });
-      isCrop = (x) => inBand[x] === 1; method = `Crop rows (${peaks.length} found)`;
-    } else {
-      const cs = colourSplit(d, mask, w * h);
-      if (cs && cs.split) { isCrop = (x, y) => cs.isCrop((y * w + x) * 4); method = 'Leaf colour compare'; }
-      else { isCrop = () => true; method = 'All plants look alike'; }
-    }
-    const G = grid(w, h), tiles = [];
-    for (let r = 0; r < G.rows; r++) for (let c = 0; c < G.cols; c++) {
-      const x0 = Math.floor(c * G.tw), x1 = Math.floor((c + 1) * G.tw), y0 = Math.floor(r * G.th), y1 = Math.floor((r + 1) * G.th);
-      let veg = 0, crop = 0;
-      for (let y = y0; y < y1; y++) for (let x = x0; x < x1; x++) if (mask[y * w + x]) { veg++; if (isCrop(x, y)) crop++; }
-      const frac = veg / ((x1 - x0) * (y1 - y0));
-      let cls = 'soil';
-      if (frac >= 0.03) { const share = crop / veg; cls = share >= 0.8 ? 'crop' : share <= 0.3 ? 'weed' : 'partial'; }
-      tiles.push({ c, r, cls });
-    }
-    return { ...G, w, h, tiles, peaks, half, method };
-  }
-
-  /* ---------- Claude Vision engine (published Claude page only) ---------- */
-  let sampleFn = null, frozen = null, claudeCtl = null;
-  (async () => {
-    try {
-      if (!window.claude || typeof window.claude.use !== 'function') return;
-      const sm = await window.claude.use('sample'); if (!sm) return;
-      const lim = await sm.limits().catch(() => null); if (!lim || !lim.images) return;
-      sampleFn = sm;
-      const opt = $('#engine option[value="claude"]'); opt.disabled = false; opt.textContent = 'Claude Vision (recognizes plants, one frame at a time)';
-    } catch (_) {}
-  })();
-  async function analyzeClaude() {
-    if (!sampleFn) return;
-    if (!drawSource()) { $('#claude-state').textContent = 'Start the camera or upload a photo or video first.'; return; }
-    const snap = document.createElement('canvas'); snap.width = view.width; snap.height = view.height;
-    snap.getContext('2d').drawImage(view, 0, 0);
-    frozen = snap; sctx.drawImage(snap, 0, 0, small.width, small.height);
-    const G = grid(small.width, small.height), k = view.width / small.width;
-    // Copy with the zone grid drawn on, so Claude can name zones exactly
-    const lab = document.createElement('canvas'); lab.width = snap.width; lab.height = snap.height;
-    const lc = lab.getContext('2d'); lc.drawImage(snap, 0, 0);
-    lc.strokeStyle = 'rgba(255,255,255,.75)'; lc.lineWidth = 1.5; lc.font = '600 13px sans-serif';
-    for (let r = 0; r < G.rows; r++) for (let c = 0; c < G.cols; c++) {
-      const x = c * G.tw * k, y = r * G.th * k; lc.strokeRect(x, y, G.tw * k, G.th * k);
-      const t = zone(c, r); lc.fillStyle = 'rgba(0,0,0,.65)'; lc.fillRect(x + 2, y + 2, lc.measureText(t).width + 6, 16); lc.fillStyle = '#fff'; lc.fillText(t, x + 5, y + 15);
-    }
-    const blob = await new Promise((ok) => lab.toBlob(ok, 'image/jpeg', 0.9));
-    const last = zone(G.cols - 1, G.rows - 1);
-    const prompt = `You are the vision system of BIOGUARD, a weeding robot built by a FIRST LEGO League team. The attached image is a farm photo with a labelled grid: ${G.cols} columns lettered A to ${String.fromCharCode(64 + G.cols)} (left to right) and ${G.rows} rows numbered 1 to ${G.rows} (top to bottom), so zones run from A1 to ${last}.
-First decide which plant is the CROP: the plant that was planted on purpose (usually the most common, evenly spaced or in rows, all the same species). Every other plant is a WEED.
-Then label EVERY zone with one of:
-- "crop": only crop plants in the zone
-- "weed": only weeds in the zone
-- "partial": both crop and weeds in the zone, or a weed tangled into a crop plant
-- "soil": bare ground, mulch or no plants
-Reply with only JSON in this shape: {"crop":"name of the crop or 'unknown'","zones":{"A1":"crop","B1":"soil"},"note":"one short sentence about the field"}. Include all ${G.cols * G.rows} zones.`;
-    claudeCtl = new AbortController();
-    $('#ask-claude').disabled = true; $('#back-live').hidden = false;
-    $('#claude-state').textContent = 'Claude is looking at the frame…';
-    const t0 = performance.now();
-    try {
-      const data = await sampleFn.json(prompt, { images: [blob], signal: claudeCtl.signal, modelTier: 'default' });
-      const zones = (data && typeof data.zones === 'object' && data.zones) || {}, tiles = [];
-      for (let r = 0; r < G.rows; r++) for (let c = 0; c < G.cols; c++) {
-        let v = String(zones[zone(c, r)] || 'soil').toLowerCase();
-        if (!['crop', 'weed', 'partial', 'soil'].includes(v)) v = 'soil';
-        tiles.push({ c, r, cls: v });
-      }
-      const crop = String(data.crop || 'unknown').slice(0, 40);
-      result = { ...G, w: small.width, h: small.height, tiles, peaks: [], half: 0, method: 'Claude · crop: ' + crop };
-      lastLogKey = ''; updateDash(result, performance.now() - t0);
-      $('#claude-state').textContent = (data.note ? String(data.note).slice(0, 200) + ' ' : '') + 'Press Back to live to keep scanning.';
-    } catch (e) {
-      const msg = { cancelled: 'Stopped.', not_granted: 'Claude was not allowed for this page. Use Smart Logic or a trained model instead.', rate_limited: 'Too many requests right now. Wait a minute, then try again.', invalid_json: 'Claude answered in the wrong format. Try again.', image_rejected: 'That frame could not be sent. Try another photo.', images_unavailable: 'This view cannot send images to Claude.' };
-      $('#claude-state').textContent = msg[e && e.code] || 'Claude could not analyze this frame. Try again.';
-    } finally { $('#ask-claude').disabled = false; claudeCtl = null; }
-  }
-
-  /* ---------- Teachable Machine engine ---------- */
-  function mapLabel(l) { l = String(l).toLowerCase(); if (/partial|mix/.test(l)) return 'partial'; if (/weed/.test(l)) return 'weed'; if (/soil|ground|background|dirt|empty|bare/.test(l)) return 'soil'; return 'crop'; }
-  async function analyzeTM() {
-    const tf = window.tf, w = small.width, h = small.height, G = grid(w, h);
-    const d = sctx.getImageData(0, 0, w, h).data, mask = vegMask(d, w * h, S.sens);
-    const boxes = [], idx = [];
-    for (let r = 0; r < G.rows; r++) for (let c = 0; c < G.cols; c++) { boxes.push([r / G.rows, c / G.cols, (r + 1) / G.rows, (c + 1) / G.cols]); idx.push(0); }
-    const batch = tf.tidy(() => tf.image.cropAndResize(tf.browser.fromPixels(small).toFloat().expandDims(0), tf.tensor2d(boxes), tf.tensor1d(idx, 'int32'), [224, 224]).div(127.5).sub(1));
-    const out = tm.predict(batch), probs = await out.array(); tf.dispose([batch, out]);
-    const hasSoil = tmLabels.some((l) => mapLabel(l) === 'soil'), tiles = [];
-    probs.forEach((p, i) => {
-      const r = Math.floor(i / G.cols), c = i % G.cols;
-      let cls = mapLabel(tmLabels[p.indexOf(Math.max(...p))] ?? 'crop');
-      if (!hasSoil) { // skip bare ground using the green mask
-        const x0 = Math.floor(c * G.tw), x1 = Math.floor((c + 1) * G.tw), y0 = Math.floor(r * G.th), y1 = Math.floor((r + 1) * G.th); let v = 0;
-        for (let y = y0; y < y1; y++) for (let x = x0; x < x1; x++) v += mask[y * w + x];
-        if (v / ((x1 - x0) * (y1 - y0)) < 0.03) cls = 'soil';
-      }
-      tiles.push({ c, r, cls, conf: Math.max(...p) });
+/* ---------- camera ---------- */
+async function listCameras(){
+  try{
+    const devs = (await navigator.mediaDevices.enumerateDevices()).filter(d=>d.kind==='videoinput');
+    const sel = $('camSelect'), cur = sel.value;
+    sel.innerHTML = '<option value="">Default camera</option>';
+    devs.forEach((d,i)=>{ const o=document.createElement('option'); o.value=d.deviceId; o.textContent=d.label||('Camera '+(i+1)); sel.appendChild(o); });
+    if (cur) sel.value = cur;
+  }catch(e){}
+}
+async function startCamera(){
+  stopCamera();
+  try{
+    const id = $('camSelect').value;
+    stream = await navigator.mediaDevices.getUserMedia({
+      video: id ? {deviceId:{exact:id}, width:{ideal:1280}, height:{ideal:720}} : {width:{ideal:1280}, height:{ideal:720}},
+      audio:false
     });
-    return { ...G, w, h, tiles, peaks: [], half: 0, method: 'Trained model' };
+    video.srcObject = stream; await video.play();
+    mode = 'camera'; still.hidden = true; $('stageTitle').textContent = 'LIVE ROBOT CAMERA';
+    $('idle').style.display='none';
+    $('camDot').className='dot live'; $('camStatus').textContent='live';
+    $('btnCam').textContent='STOP CAMERA'; $('btnCam').className='danger';
+    $('btnDetect').disabled=false; $('btnSnap').disabled=false; $('btnScan').disabled=false;
+    listCameras(); log('Camera started');
+  }catch(e){
+    $('camDot').className='dot err'; $('camStatus').textContent='error';
+    log('Camera error: '+e.message);
+    alert('Could not open camera: '+e.message+'\n\nAllow camera access, and open this page from localhost or https if it is blocked.');
   }
+}
+function stopCamera(){
+  if (stream){ stream.getTracks().forEach(t=>t.stop()); stream=null; }
+  detecting=false; video.srcObject=null; lastPreds=[]; draw();
+  $('idle').style.display='flex';
+  $('camDot').className='dot'; $('camStatus').textContent='off';
+  $('btnCam').textContent='START CAMERA'; $('btnCam').className='primary';
+  $('btnDetect').disabled=true; $('btnDetect').textContent='AUTO SCAN'; $('btnSnap').disabled=true; $('btnScan').disabled=true;
+  $('aiDot').className='dot'; $('aiStatus').textContent='idle';
+}
+$('btnCam').onclick = () => stream ? stopCamera() : startCamera();
+$('camSelect').onchange = () => { if (stream) startCamera(); };
 
-  /* ---------- Drawing ---------- */
-  const zone = (c, r) => String.fromCharCode(65 + c) + (r + 1);
-  function overlay(res) {
-    if (!res) return;
-    const k = view.width / res.w, tw = res.tw * k, th = res.th * k;
-    vctx.save();
-    if (res.peaks.length) { vctx.setLineDash([8, 8]); vctx.strokeStyle = COL.cyan; vctx.globalAlpha = .7; vctx.lineWidth = 1.5; res.peaks.forEach((p) => { vctx.beginPath(); vctx.moveTo(p * k, 0); vctx.lineTo(p * k, view.height); vctx.stroke(); }); vctx.setLineDash([]); vctx.globalAlpha = 1; }
-    vctx.strokeStyle = 'rgba(255,255,255,.12)'; vctx.lineWidth = 1;
-    for (let c = 1; c < res.cols; c++) { vctx.beginPath(); vctx.moveTo(c * tw, 0); vctx.lineTo(c * tw, view.height); vctx.stroke(); }
-    for (let r = 1; r < res.rows; r++) { vctx.beginPath(); vctx.moveTo(0, r * th); vctx.lineTo(view.width, r * th); vctx.stroke(); }
-    vctx.font = '600 11px "JetBrains Mono", monospace';
-    res.tiles.forEach((t) => {
-      if (t.cls === 'soil') return;
-      const x = t.c * tw, y = t.r * th, col = COL[t.cls];
-      vctx.globalAlpha = t.cls === 'crop' ? .14 : .26; vctx.fillStyle = col; vctx.fillRect(x, y, tw, th);
-      vctx.globalAlpha = 1; vctx.strokeStyle = col; vctx.lineWidth = t.cls === 'crop' ? 1.5 : 2.5; vctx.strokeRect(x + 2, y + 2, tw - 4, th - 4);
-      if (t.cls !== 'crop') { const lbl = zone(t.c, t.r); vctx.fillStyle = 'rgba(4,16,20,.8)'; vctx.fillRect(x + 4, y + 4, vctx.measureText(lbl).width + 8, 16); vctx.fillStyle = col; vctx.fillText(lbl, x + 8, y + 16); }
-    });
-    if (res.boxes) {
-      vctx.font = '600 12px "JetBrains Mono", monospace';
-      res.boxes.forEach((b) => {
-        const col = COL[b.cls] || COL.crop; vctx.strokeStyle = col; vctx.lineWidth = 3; vctx.strokeRect(b.x * k, b.y * k, b.w * k, b.h * k);
-        const t = `${b.name} ${Math.round(b.conf * 100)}%`, tw2 = vctx.measureText(t).width + 8;
-        vctx.fillStyle = col; vctx.fillRect(b.x * k, Math.max(0, b.y * k - 18), tw2, 18); vctx.fillStyle = '#061419'; vctx.fillText(t, b.x * k + 4, Math.max(13, b.y * k - 5));
-      });
+/* ---------- detection ---------- */
+function isWeed(cls){
+  const names = $('weedNames').value.toLowerCase().split(',').map(s=>s.trim()).filter(Boolean);
+  const c = String(cls).toLowerCase();
+  return names.some(n => c.includes(n));
+}
+async function inferOnce(){
+  const key=$('apiKey').value.trim(), model=$('modelId').value.trim(), ver=$('modelVer').value.trim()||'1';
+  if (!key || !model) throw new Error('Enter your Roboflow API key and model ID');
+  const {el, w:vw, h:vh} = src(); if(!vw) return null;
+  const scale = Math.min(1, 640/vw);
+  grab.width = Math.round(vw*scale); grab.height = Math.round(vh*scale);
+  gctx.drawImage(el,0,0,grab.width,grab.height);
+  const b64 = grab.toDataURL('image/jpeg',0.75).split(',')[1];
+  const url = `${$('endpoint').value}/${encodeURIComponent(model)}/${encodeURIComponent(ver)}?api_key=${encodeURIComponent(key)}&confidence=${$('conf').value}&overlap=30`;
+  scans++; $('scans').textContent = scans;
+  const t0 = performance.now();
+  const res = await fetch(url,{method:'POST',headers:{'Content-Type':'application/x-www-form-urlencoded'},body:b64});
+  if (!res.ok) throw new Error('Roboflow '+res.status+': '+(await res.text()).slice(0,120));
+  const data = await res.json();
+  $('latency').textContent = Math.round(performance.now()-t0)+' ms';
+  return (data.predictions||[]).map(p=>({...p, x:p.x/scale, y:p.y/scale, width:p.width/scale, height:p.height/scale}));
+}
+async function loop(){
+  while (detecting && stream){
+    try{
+      const preds = await inferOnce();
+      if (preds){ lastPreds = preds; update(); frames++; }
+      $('aiDot').className='dot live'; $('aiStatus').textContent='detecting';
+    }catch(e){
+      $('aiDot').className='dot err'; $('aiStatus').textContent='error';
+      log(e.message); detecting=false; $('btnDetect').textContent='AUTO SCAN'; break;
     }
-    vctx.restore();
+    const now=performance.now();
+    if (now-fpsTimer>1000){ $('fps').textContent=(frames*1000/(now-fpsTimer)).toFixed(1); frames=0; fpsTimer=now; }
   }
+}
+$('btnDetect').onclick = () => {
+  detecting = !detecting;
+  $('btnDetect').textContent = detecting ? 'STOP AUTO SCAN' : 'AUTO SCAN';
+  if (detecting){ log('Detection started'); loop(); }
+  else { $('aiDot').className='dot'; $('aiStatus').textContent='paused'; lastPreds=[]; draw(); }
+};
 
-  /* ---------- Dashboard ---------- */
-  const ENGINE_NAME = { rows: 'Smart Logic', tm: 'Teachable Machine', claude: 'Claude Vision', roboflow: 'Roboflow' };
-  const fmtTime = () => new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit', second: '2-digit' });
-  function updateDash(res, ms) {
-    const n = { crop: 0, partial: 0, weed: 0, soil: 0 }; res.tiles.forEach((t) => n[t.cls]++);
-    const plants = n.crop + n.partial + n.weed, total = res.tiles.length, pct = (v) => plants ? Math.round(v / plants * 100) : 0;
-    ['crop', 'partial', 'weed'].forEach((k) => { $('#n-' + k).textContent = n[k]; $('#p-' + k).textContent = pct(n[k]) + '% of plants'; $('#b-' + k).style.width = pct(n[k]) + '%'; });
-    const weedShare = plants ? n.weed / plants : 0, partShare = plants ? n.partial / plants : 0;
-    let lamp, title, sub;
-    if (!plants) { lamp = 'var(--ink-2)'; title = 'No plants in view'; sub = 'Point the camera at the crop rows.'; }
-    else if (weedShare >= 0.2) { lamp = 'var(--weed)'; title = 'Weeds detected'; sub = `${n.weed} weed zones. Spot-spray now.`; }
-    else if (n.weed > 0 || partShare >= 0.15) { lamp = 'var(--partial)'; title = 'Weeds starting'; sub = `${n.weed} weed and ${n.partial} partial zones to watch.`; }
-    else { lamp = 'var(--crop)'; title = 'Crop healthy'; sub = 'No weeds found in this frame.'; }
-    $('#status').style.setProperty('--lamp', lamp); $('#status-title').textContent = title; $('#status-sub').textContent = sub;
-    const spray = n.weed + n.partial, saved = total ? Math.round((1 - spray / total) * 100) : 0;
-    $('#saved').textContent = saved + '%';
-    $('#m-weed').style.width = (total ? n.weed / total * 100 : 0) + '%'; $('#m-partial').style.width = (total ? n.partial / total * 100 : 0) + '%';
-    $('#spray-text').textContent = `Spray ${spray} of ${total} zones (${n.weed} weed + ${n.partial} partial) instead of all ${total}.`;
-    $('#s-engine').textContent = ENGINE_NAME[S.engine];
-    $('#s-rows').textContent = res.method || '—';
-    $('#s-zones').textContent = `${res.cols} × ${res.rows}`;
-    $('#s-ms').textContent = ms.toFixed(0) + ' ms';
-    // Log: one line when the weed picture changes
-    const bad = res.tiles.filter((t) => t.cls === 'weed').map((t) => zone(t.c, t.r));
-    const key = bad.join(',') + '|' + n.partial;
-    if (key !== lastLogKey && plants) {
-      lastLogKey = key;
-      const li = document.createElement('li');
-      li.style.setProperty('--c', n.weed ? 'var(--weed)' : n.partial ? 'var(--partial)' : 'var(--crop)');
-      const tm_ = document.createElement('time'); tm_.textContent = fmtTime(); li.append(tm_);
-      li.append(n.weed ? `${n.weed} weed, ${n.partial} partial · ${bad.slice(0, 6).join(' ')}${bad.length > 6 ? ' …' : ''}` : n.partial ? `${n.partial} partial zones, no full weeds` : 'All clear, crop only');
-      const log = $('#log'); log.prepend(li); while (log.children.length > 12) log.lastChild.remove();
-    }
-  }
+/* ---------- drawing & stats ---------- */
+let lastLogged = '';
+function update(){
+  const weeds = lastPreds.filter(p=>isWeed(p.class)).length, crops = lastPreds.length - weeds;
+  $('weedCount').textContent = weeds; $('cropCount').textContent = crops;
+  const a = $('alert');
+  if (weeds){ a.className='alert on'; a.textContent='⚠ WEED DETECTED ('+weeds+')'; }
+  else if (crops){ a.className='alert ok'; a.textContent='✓ CROPS HEALTHY — NO WEEDS'; }
+  else { a.className='alert'; a.textContent='NOTHING DETECTED'; }
+  const sig = weeds+'/'+crops;
+  if (sig!==lastLogged){ log(`Weeds: ${weeds}  Crops: ${crops}`); lastLogged=sig; }
+  draw();
+}
+function draw(){
+  const S = src(); const vw=S.w||640, vh=S.h||480;
+  const rect = overlay.getBoundingClientRect();
+  overlay.width = rect.width*devicePixelRatio; overlay.height = rect.height*devicePixelRatio;
+  ctx.clearRect(0,0,overlay.width,overlay.height);
+  const s = Math.min(overlay.width/vw, overlay.height/vh);
+  const ox = (overlay.width-vw*s)/2, oy = (overlay.height-vh*s)/2;
+  const fs = Math.max(12, 14*devicePixelRatio);
+  ctx.font = `bold ${fs}px Inter, sans-serif`; ctx.lineWidth = 3*devicePixelRatio;
+  lastPreds.forEach(p=>{
+    const col = isWeed(p.class) ? '#ff4d5e' : '#4ade80';
+    const x = ox+(p.x-p.width/2)*s, y = oy+(p.y-p.height/2)*s, w = p.width*s, h = p.height*s;
+    ctx.strokeStyle = col; ctx.strokeRect(x,y,w,h);
+    const label = `${p.class} ${Math.round(p.confidence*100)}%`;
+    const tw = ctx.measureText(label).width+10;
+    ctx.fillStyle = col; ctx.fillRect(x, Math.max(0,y-fs-8), tw, fs+8);
+    ctx.fillStyle = '#000'; ctx.fillText(label, x+5, Math.max(fs, y-6));
+  });
+}
+window.addEventListener('resize', draw);
 
-  /* ---------- Main loop ---------- */
-  function drawSource() {
-    if (frozen && S.engine === 'claude') { size(frozen.width, frozen.height); vctx.drawImage(frozen, 0, 0); return true; }
-    if ((S.source === 'camera' || S.source === 'video') && video.readyState >= 2) { size(video.videoWidth, video.videoHeight); vctx.drawImage(video, 0, 0, view.width, view.height); return true; }
-    if (S.source === 'image' && upImg) { size(upImg.naturalWidth, upImg.naturalHeight); vctx.drawImage(upImg, 0, 0, view.width, view.height); return true; }
-    if (S.source === 'none') drawEmpty();
-    return false;
+/* ---------- snapshot & log ---------- */
+$('btnSnap').onclick = () => {
+  const S = src();
+  const c = document.createElement('canvas'); c.width=S.w; c.height=S.h;
+  const x = c.getContext('2d'); x.drawImage(S.el,0,0);
+  x.lineWidth=4; x.font='bold 20px sans-serif';
+  lastPreds.forEach(p=>{ const col=isWeed(p.class)?'#ff4d5e':'#4ade80'; x.strokeStyle=col;
+    x.strokeRect(p.x-p.width/2,p.y-p.height/2,p.width,p.height);
+    x.fillStyle=col; x.fillText(p.class+' '+Math.round(p.confidence*100)+'%', p.x-p.width/2+4, p.y-p.height/2-6); });
+  const a=document.createElement('a'); a.download='bioguard_'+Date.now()+'.png'; a.href=c.toDataURL('image/png'); a.click();
+  log('Snapshot saved');
+};
+function log(msg){
+  const d=document.createElement('div'); d.textContent=new Date().toLocaleTimeString()+'  '+msg;
+  $('log').prepend(d); while($('log').children.length>60) $('log').lastChild.remove();
+}
+/* ---------- image upload ---------- */
+async function analyzeImage(){
+  if (mode !== 'image') return;
+  $('aiDot').className='dot live'; $('aiStatus').textContent='analyzing…';
+  try{
+    lastPreds = (await inferOnce()) || []; lastLogged=''; update();
+    $('aiStatus').textContent='done';
+  }catch(e){
+    $('aiDot').className='dot err'; $('aiStatus').textContent='error'; log(e.message);
   }
-  function drawEmpty() {
-    size(640, 480);
-    vctx.fillStyle = '#061419'; vctx.fillRect(0, 0, view.width, view.height);
-    vctx.strokeStyle = 'rgba(79,240,216,.18)'; vctx.lineWidth = 1;
-    for (let x = 80; x < view.width; x += 80) { vctx.beginPath(); vctx.moveTo(x, 0); vctx.lineTo(x, view.height); vctx.stroke(); }
-    for (let y = 80; y < view.height; y += 80) { vctx.beginPath(); vctx.moveTo(0, y); vctx.lineTo(view.width, y); vctx.stroke(); }
-    vctx.textAlign = 'center'; vctx.fillStyle = '#e4f3ef'; vctx.font = '600 24px "Bricolage Grotesque", system-ui, sans-serif';
-    vctx.fillText('No camera feed yet', view.width / 2, view.height / 2 - 8);
-    vctx.fillStyle = '#9cbfb8'; vctx.font = '15px "Atkinson Hyperlegible", system-ui, sans-serif';
-    vctx.fillText('Press Live camera, or upload a field photo or video.', view.width / 2, view.height / 2 + 22);
-    vctx.textAlign = 'start';
-  }
-  async function scan() {
-    busy = true; const t0 = performance.now();
-    try {
-      sctx.drawImage(view, 0, 0, small.width, small.height);
-      result = S.engine === 'roboflow' ? await analyzeRoboflow() : (S.engine === 'tm' && tm) ? await analyzeTM() : analyzeRows();
-      updateDash(result, performance.now() - t0);
-      scans.push(performance.now()); scans = scans.filter((t) => performance.now() - t < 2000);
-      $('#hud-fps').textContent = (scans.length / 2).toFixed(1) + ' scans/s';
-    } catch (e) { if (S.engine === 'roboflow') { $('#rf-state').textContent = e.message; lastScan = performance.now() + 8000; } else showNotice('Scan failed: ' + e.message); }
-    busy = false;
-  }
-  function loop(now) {
-    const ok = drawSource();
-    if (ok) {
-      const still = S.source === 'image';
-      const every = S.engine === 'roboflow' ? (still && result ? Infinity : RF.interval) : (still ? 1200 : 350);
-      if (S.engine !== 'claude' && !busy && !S.paused && now - lastScan > every) { lastScan = now; scan(); }
-      overlay(result);
-    }
-    requestAnimationFrame(loop);
-  }
-
-  /* ---------- Sources ---------- */
-  function showNotice(msg) { const n = $('#notice'); n.textContent = msg; n.hidden = !msg; }
-  function setSourceButtons(which) { ['camera', 'upload'].forEach((k) => $('#src-' + k).setAttribute('aria-pressed', String(k === which))); }
-  function stopCamera() { if (stream) { stream.getTracks().forEach((t) => t.stop()); stream = null; } video.srcObject = null; }
-  function resetScan() { frozen = null; result = null; lastLogKey = ''; lastScan = 0; }
-
-  $('#src-camera').onclick = async () => {
-    showNotice('');
-    if (!navigator.mediaDevices?.getUserMedia) { showNotice('This browser has no camera access here. Open BIOGUARD.html in Chrome or Edge, or upload a photo or video.'); return; }
-    try {
-      stopCamera();
-      stream = await navigator.mediaDevices.getUserMedia({ video: { facingMode: { ideal: 'environment' }, width: { ideal: 1280 } }, audio: false });
-      video.removeAttribute('src'); video.srcObject = stream; await video.play();
-      S.source = 'camera'; setSourceButtons('camera'); $('#hud-src').textContent = 'LIVE CAMERA'; resetScan();
-    } catch (e) {
-      showNotice('The camera could not start (' + (e.name || 'blocked') + '). This preview blocks cameras: open BIOGUARD.html in Chrome or Edge on the laptop and allow camera access, or upload a photo or video below.');
-    }
+}
+function loadImage(file){
+  if (!file || !file.type.startsWith('image/')) return;
+  stopCamera(); mode = 'image';
+  const r = new FileReader();
+  r.onload = () => {
+    still.onload = () => {
+      still.hidden = false; $('idle').style.display='none';
+      $('stageTitle').textContent = 'UPLOADED IMAGE';
+      $('btnSnap').disabled = false; $('btnScan').disabled = false; lastPreds = []; draw();
+      log('Image loaded: '+file.name); analyzeImage();
+    };
+    still.src = r.result;
   };
-  $('#src-upload').onclick = () => $('#media-input').click();
-  $('#media-input').onchange = (e) => {
-    const f = e.target.files[0]; if (!f) return; stopCamera(); showNotice(''); resetScan();
-    const url = URL.createObjectURL(f);
-    if (f.type.startsWith('video/')) { video.src = url; video.play().catch(() => {}); S.source = 'video'; $('#hud-src').textContent = 'VIDEO · ' + f.name.slice(0, 24).toUpperCase(); }
-    else { const img = new Image(); img.onload = () => { upImg = img; S.source = 'image'; }; img.src = url; $('#hud-src').textContent = 'PHOTO · ' + f.name.slice(0, 24).toUpperCase(); }
-    setSourceButtons('upload'); e.target.value = '';
-  };
-  $('#pause').onclick = () => { S.paused = !S.paused; $('#pause').textContent = S.paused ? 'Resume' : 'Pause'; $('#feed-panel').classList.toggle('paused', S.paused); if (S.source === 'camera' || S.source === 'video') S.paused ? video.pause() : video.play().catch(() => {}); };
+  r.readAsDataURL(file);
+}
+$('btnUpload').onclick = () => $('imgInput').click();
+$('imgInput').onchange = e => { loadImage(e.target.files[0]); e.target.value=''; };
+const stage = $('stage');
+stage.addEventListener('dragover', e => { e.preventDefault(); stage.classList.add('drag'); });
+stage.addEventListener('dragleave', () => stage.classList.remove('drag'));
+stage.addEventListener('drop', e => { e.preventDefault(); stage.classList.remove('drag'); loadImage(e.dataTransfer.files[0]); });
+// weed-name changes only recolor existing boxes (no new scan, no credits)
+$('weedNames').addEventListener('input', () => { if (lastPreds.length) update(); });
 
-  /* ---------- Controls ---------- */
-  const bind = (id, key, fmt, num = parseFloat) => { const el = $('#' + id); const set = () => { S[key] = num(el.value); $('#' + id + '-out').textContent = fmt(S[key]); lastScan = 0; }; el.oninput = set; set(); };
-  bind('cols', 'cols', (v) => v + ' columns', (v) => parseInt(v, 10));
-  bind('sens', 'sens', (v) => v.toFixed(2));
-  bind('band', 'band', (v) => v + '%');
-  $('#engine').onchange = (e) => {
-    S.engine = e.target.value; frozen = null; if (claudeCtl) claudeCtl.abort();
-    $('#hud-engine').textContent = ENGINE_NAME[S.engine].toUpperCase();
-    $('#claude-row').hidden = S.engine !== 'claude'; $('#rf-row').hidden = S.engine !== 'roboflow'; $('#back-live').hidden = true;
-    $('#hud-fps').textContent = S.engine === 'claude' ? 'ON DEMAND' : '— scans/s';
-    resetScan();
-  };
-  $('#ask-claude').onclick = () => { frozen = null; analyzeClaude(); };
-  $('#back-live').onclick = () => { if (claudeCtl) claudeCtl.abort(); frozen = null; result = null; $('#back-live').hidden = true; $('#claude-state').textContent = 'Live. Press Analyze when the camera shows the field.'; };
-
-  /* ---------- Roboflow engine (hosted Workflow API) ---------- */
-  const RF = { interval: 1000, conf: 0.4, endpoint: null };
-  const rfCanvas = document.createElement('canvas');
-  const rfLoad = (k) => { try { return localStorage.getItem(k) || ''; } catch (_) { return ''; } };
-  const rfSave = (k, v) => { try { localStorage.setItem(k, v); } catch (_) {} };
-  function rfMap(name) { const l = String(name).toLowerCase(); if (/partial|mix/.test(l)) return 'partial'; if (/weed/.test(l)) return 'weed'; if (/soil|ground|background/.test(l)) return 'soil'; return 'crop'; }
-  // Workflows name their outputs freely, so look for the first list of boxes anywhere in the reply
-  function findBoxes(o, depth = 0) {
-    if (!o || typeof o !== 'object' || depth > 8) return null;
-    if (Array.isArray(o)) {
-      if (o.length && o.every((p) => p && typeof p === 'object' && typeof p.x === 'number' && typeof p.width === 'number' && ('class' in p || 'class_name' in p))) return o;
-      for (const v of o) { const f = findBoxes(v, depth + 1); if (f) return f; }
-      return null;
-    }
-    if (Array.isArray(o.predictions) && o.predictions.length === 0) return [];
-    for (const k of Object.keys(o)) { if (k === 'value' || /image|visual/i.test(k) && typeof o[k] === 'string') continue; const f = findBoxes(o[k], depth + 1); if (f) return f; }
-    return null;
+/* ---------- single scan (saves credits) ---------- */
+async function scanNow(){
+  if (scanning || detecting) return;
+  if (mode === 'image') return analyzeImage();
+  if (!stream) return;
+  scanning = true; $('btnScan').disabled = true;
+  $('aiDot').className='dot live'; $('aiStatus').textContent='scanning…';
+  try{
+    lastPreds = (await inferOnce()) || []; lastLogged=''; update();
+    $('aiStatus').textContent='scan done';
+  }catch(e){
+    $('aiDot').className='dot err'; $('aiStatus').textContent='error'; log(e.message);
   }
-  function rfEndpoints(id) {
-    const clean = id.trim().replace(/^https?:\/\/[^/]+\//, '').replace(/^infer\/workflows\//, '').replace(/^\/+|\/+$/g, '');
-    let ws, wf;
-    if (clean.includes('/workflows/')) [ws, wf] = clean.split('/workflows/'); else [ws, wf] = clean.split('/');
-    if (!ws || !wf) return [];
-    return [`https://serverless.roboflow.com/infer/workflows/${ws}/${wf}`, `https://serverless.roboflow.com/${ws}/workflows/${wf}`];
+  scanning = false; $('btnScan').disabled = !(stream || mode==='image');
+}
+$('btnScan').onclick = scanNow;
+// Space bar = scan (when not typing in a box)
+document.addEventListener('keydown', e => {
+  if (e.code === 'Space' && !['INPUT','SELECT','TEXTAREA'].includes(document.activeElement.tagName)){
+    e.preventDefault(); scanNow();
   }
-  async function analyzeRoboflow() {
-    // Copy the clean frame now, before the overlay is drawn on top of it
-    rfCanvas.width = view.width; rfCanvas.height = view.height; rfCanvas.getContext('2d').drawImage(view, 0, 0);
-    const key = $('#rf-key').value.trim(), list = rfEndpoints($('#rf-workflow').value);
-    if (!key) throw new Error('Add your Roboflow API key in the Roboflow box.');
-    if (!list.length) throw new Error('The workflow ID should look like workspace/workflows/workflow-id.');
-    const b64 = rfCanvas.toDataURL('image/jpeg', 0.85).split(',')[1];
-    const body = JSON.stringify({ api_key: key, inputs: { image: { type: 'base64', value: b64 } } });
-    const tries = RF.endpoint ? [RF.endpoint] : list;
-    let res = null, lastStatus = 0, lastText = ''; const netFails = [];
-    const showRaw = (t) => { $('#rf-raw').textContent = t.replace(/"[A-Za-z0-9+/=]{300,}"/g, '"<image data hidden>"').slice(0, 6000); };
-    for (const url of tries) {
-      try { res = await fetch(url, { method: 'POST', headers: { 'Content-Type': 'application/json' }, body }); }
-      catch (err) { netFails.push(url + '  →  ' + (err && err.message || 'blocked')); res = null; continue; }
-      lastStatus = res.status;
-      if (!res.ok) { lastText = await res.text().catch(() => ''); showRaw(`HTTP ${res.status} from ${url}\n\n${lastText}`); }
-      if (res.ok) { RF.endpoint = url; break; }
-      if (res.status === 401 || res.status === 403) throw new Error('Roboflow did not accept the API key. Copy it again from Roboflow settings (Settings → API Keys, the Private API Key).');
-      res = null;
-    }
-    if (!res && netFails.length === tries.length) {
-      showRaw('No reply. The browser could not connect to:\n' + netFails.join('\n') + '\n\nPage opened from: ' + location.protocol + '//' + (location.host || '(your computer)') + '\nPress F12 → Console for the exact reason (look for "CORS").');
-      throw new Error(location.protocol === 'file:' ? 'Could not reach Roboflow. The browser may be blocking calls from a file opened from your computer. Open the page from a web address instead (see the reply box below).' : 'Could not reach Roboflow. Check the internet connection, or whether the school network blocks roboflow.com.');
-    }
-    if (!res) throw new Error(`Roboflow answered with error ${lastStatus}: ${(lastText.match(/"message"\s*:\s*"([^"]+)/) || [, lastText.slice(0, 160)])[1]}`);
-    const txt = await res.text(); showRaw(txt);
-    let data; try { data = JSON.parse(txt); } catch (_) { throw new Error('Roboflow replied with something that is not JSON. See the Roboflow reply below.'); }
-    const raw = findBoxes(data && data.outputs ? data.outputs : data);
-    if (raw === null) throw new Error('Roboflow answered, but no plant boxes were found in the reply. Make sure the workflow outputs model predictions.');
-    const boxes = raw.filter((p) => (p.confidence ?? 1) >= RF.conf).map((p) => ({ x: p.x - p.width / 2, y: p.y - p.height / 2, w: p.width, h: p.height, name: String(p.class ?? p.class_name), cls: rfMap(p.class ?? p.class_name), conf: p.confidence ?? 1 }));
-    // Turn boxes into the zone grid so the dashboard and spray plan still work
-    const G = grid(view.width, view.height), tiles = [];
-    for (let r = 0; r < G.rows; r++) for (let c = 0; c < G.cols; c++) {
-      const tx = c * G.tw, ty = r * G.th, area = G.tw * G.th; let crop = false, weed = false, part = false;
-      for (const b of boxes) {
-        const ox = Math.max(0, Math.min(tx + G.tw, b.x + b.w) - Math.max(tx, b.x)), oy = Math.max(0, Math.min(ty + G.th, b.y + b.h) - Math.max(ty, b.y));
-        if (ox * oy > 0.1 * Math.min(area, b.w * b.h)) { if (b.cls === 'crop') crop = true; else if (b.cls === 'weed') weed = true; else if (b.cls === 'partial') part = true; }
-      }
-      tiles.push({ c, r, cls: part || (crop && weed) ? 'partial' : weed ? 'weed' : crop ? 'crop' : 'soil' });
-    }
-    const counts = {}; boxes.forEach((b) => { counts[b.name] = (counts[b.name] || 0) + 1; });
-    $('#rf-classes').textContent = boxes.length ? 'Found: ' + Object.entries(counts).map(([n, v]) => `${n} ×${v} (${rfMap(n)})`).join(', ') : 'No plants found in this frame.';
-    $('#rf-state').textContent = 'Connected to Roboflow · last scan ' + new Date().toLocaleTimeString();
-    return { ...G, w: view.width, h: view.height, tiles, peaks: [], half: 0, boxes, method: `Roboflow · ${boxes.length} plants` };
-  }
-  $('#rf-key').value = rfLoad('bioguard-rf-key');
-  const savedWf = rfLoad('bioguard-rf-workflow'); if (savedWf) $('#rf-workflow').value = savedWf;
-  $('#rf-key').onchange = (e) => { rfSave('bioguard-rf-key', e.target.value.trim()); RF.endpoint = null; };
-  $('#rf-workflow').onchange = (e) => { rfSave('bioguard-rf-workflow', e.target.value.trim()); RF.endpoint = null; };
-  $('#rf-mode').onchange = (e) => { RF.interval = e.target.value === 'manual' ? Infinity : +e.target.value; };
-  $('#rf-conf').oninput = (e) => { RF.conf = e.target.value / 100; $('#rf-conf-out').textContent = e.target.value + '%'; };
-  $('#rf-scan').onclick = () => {
-    if (busy) return;
-    if (!drawSource()) { $('#rf-state').textContent = 'Start the camera or upload a photo or video first.'; return; }
-    lastScan = performance.now(); scan();
-  };
+});
 
-  /* ---------- Teachable Machine loading ---------- */
-  function loadTF() {
-    if (window.tf) return Promise.resolve();
-    return new Promise((ok, fail) => { const s = document.createElement('script'); s.src = 'https://cdn.jsdelivr.net/npm/@tensorflow/tfjs@4.22.0/dist/tf.min.js'; s.onload = ok; s.onerror = () => fail(new Error('could not load TensorFlow.js')); document.head.append(s); });
-  }
-  $('#load-model').onclick = () => $('#model-input').click();
-  $('#model-input').onchange = async (e) => {
-    const files = [...e.target.files], st = $('#model-state'); e.target.value = '';
-    const json = files.find((f) => f.name.endsWith('.json') && !/meta/i.test(f.name)), meta = files.find((f) => /meta/i.test(f.name)), bins = files.filter((f) => f.name.endsWith('.bin'));
-    if (!json || !bins.length) { st.textContent = 'Pick model.json and weights.bin together (and metadata.json).'; return; }
-    try {
-      st.textContent = 'Loading TensorFlow.js…'; await loadTF();
-      st.textContent = 'Loading model…';
-      tm = await window.tf.loadLayersModel(window.tf.io.browserFiles([json, ...bins]));
-      const outN = tm.outputs[0].shape.at(-1);
-      tmLabels = meta ? (JSON.parse(await meta.text()).labels || []) : [];
-      if (tmLabels.length !== outN) tmLabels = ['Crop', 'Partial weed', 'Weed', 'Soil'].slice(0, outN);
-      const opt = $('#engine option[value="tm"]'); opt.disabled = false; opt.textContent = 'Teachable Machine model (' + tmLabels.join(' / ') + ')';
-      $('#engine').value = 'tm'; $('#engine').dispatchEvent(new Event('change'));
-      st.textContent = 'Model ready · classes: ' + tmLabels.map((l) => `${l} → ${mapLabel(l)}`).join(', ');
-    } catch (err) { st.textContent = 'Model did not load: ' + err.message; }
-  };
-
-  /* ---------- Logo slots ---------- */
-  let target = null;
-  const slots = { fll: $('#slot-fll'), team: $('#slot-team') };
-  function setLogo(key, src) { const el = slots[key]; el.innerHTML = ''; const img = new Image(); img.alt = key === 'fll' ? 'FIRST LEGO League logo' : 'Roboraptors logo'; img.src = src; el.append(img); el.classList.add('filled'); }
-  Object.entries(slots).forEach(([k, el]) => { el.onclick = () => { target = k; $('#logo-input').click(); }; try { const s = localStorage.getItem('bioguard-logo-' + k); if (s) setLogo(k, s); } catch (_) {} });
-  $('#logo-input').onchange = (e) => {
-    const f = e.target.files[0]; e.target.value = ''; if (!f || !target) return;
-    const rd = new FileReader(); const k = target;
-    rd.onload = () => { setLogo(k, rd.result); try { localStorage.setItem('bioguard-logo-' + k, rd.result); } catch (_) {} };
-    rd.readAsDataURL(f);
-  };
-
-  requestAnimationFrame(loop);
-})();
+listCameras();
 </script>
+</body>
+</html>
