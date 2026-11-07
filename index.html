@@ -64,7 +64,9 @@
   .heat-wrap h3{font-family:Rajdhani,sans-serif;margin:0 0 8px;font-size:16px;color:var(--muted);letter-spacing:1px;
     display:flex;justify-content:space-between;align-items:center;gap:8px}
   .heat-wrap h3 span{font-family:Inter,sans-serif;font-size:12px;letter-spacing:0}
-  .heat-canvas{width:100%;aspect-ratio:4/3;border-radius:8px;background:#000;display:block}
+  .heat-canvas{width:100%;aspect-ratio:4/3;border-radius:8px;background:#05060f;display:block}
+  .thermal-bar{height:10px;border-radius:5px;margin-top:4px;background:linear-gradient(90deg,#05060f,#2a0a4a,#7a1a6a,#ff4d5e,#ffb02e,#fffbe0)}
+  .thermal-lbl{display:flex;justify-content:space-between;font-size:11px;color:var(--muted);margin-top:3px}
   .legend{display:flex;flex-direction:column;gap:8px;font-size:13px;color:var(--muted);margin-top:12px}
   .sw{display:inline-block;width:12px;height:12px;border-radius:3px;margin-right:8px;vertical-align:middle}
   .zone-stats{display:grid;grid-template-columns:1fr 1fr;gap:8px}
@@ -122,7 +124,7 @@
       <h2>WEED &amp; CROP HEAT MAP</h2>
       <div class="heat-wrap">
         <div>
-          <h3>CAMERA VIEW ZONES <span id="heatScans">0 scans</span></h3>
+          <h3>THERMAL DETECTION VIEW <span id="heatScans">0 scans</span></h3>
           <canvas id="heatCam" class="heat-canvas"></canvas>
         </div>
         <div class="heat-side">
@@ -137,12 +139,14 @@
             <span><i class="sw" style="background:#ff4d5e"></i>Weeds</span>
             <span><i class="sw" style="background:#ff9f2e"></i>Mixed — crops &amp; weeds together</span>
             <span><i class="sw" style="background:#4ade80"></i>Crops only</span>
-            <span><i class="sw" style="background:#2a3830"></i>Nothing detected yet</span>
           </div>
+          <div style="margin-top:14px;font-size:12px;color:var(--muted)">Detection heat</div>
+          <div class="thermal-bar"></div>
+          <div class="thermal-lbl"><span>None</span><span>Seen often</span></div>
           <button id="btnHeatReset">RESET HEAT MAP</button>
         </div>
       </div>
-      <p style="font-size:12px;color:var(--muted);margin:10px 0 0">Every scan adds its detections to the zone where they were seen. Brighter zones = detected more often. The number is how many times.</p>
+      <p style="font-size:12px;color:var(--muted);margin:10px 0 0">Every scan adds a heat spot where each plant was seen. Spots that keep getting detected grow hotter and glow white at the center.</p>
     </div>
   </section>
 
@@ -468,27 +472,61 @@ document.addEventListener('keydown', e => {
   }
 });
 
-/* ---------- heat map dashboard ---------- */
-const HC = 8, HR = 6;                       // zone grid over the camera view
-const COL = {weed:'#ff4d5e', mixed:'#ff9f2e', crop:'#4ade80'};
+/* ---------- thermal heat map ---------- */
+const HC = 8, HR = 6;                       // zones used for the summary counts
+const GW = 160, GH = 120;                   // heat field resolution
 const heatCv = $('heatCam'), hctx = heatCv.getContext('2d');
-const bgCv = document.createElement('canvas'), bgctx = bgCv.getContext('2d');
-let camHeat = [], heatScans = 0;
+const fieldCv = document.createElement('canvas'); fieldCv.width = GW; fieldCv.height = GH;
+const fctx = fieldCv.getContext('2d');
+let camHeat = [], heatPts = [], heatScans = 0;
 
 function zoneStatus(w,c){ return w && c ? 'mixed' : w ? 'weed' : c ? 'crop' : 'none'; }
-function resetCamHeat(){ camHeat = Array.from({length:HC*HR}, ()=>({w:0,c:0})); heatScans = 0; bgCv.width = 0; }
+function resetCamHeat(){ camHeat = Array.from({length:HC*HR}, ()=>({w:0,c:0})); heatPts = []; heatScans = 0; }
 
 function heatRecord(preds, vw, vh){
   heatScans++;
-  bgCv.width = grab.width; bgCv.height = grab.height; bgctx.drawImage(grab, 0, 0);   // last scanned frame
   preds.forEach(p=>{
-    const cx = Math.min(HC-1, Math.max(0, Math.floor(p.x/vw*HC)));
-    const cy = Math.min(HR-1, Math.max(0, Math.floor(p.y/vh*HR)));
-    const z = camHeat[cy*HC + cx];
-    if (isWeed(p.class)) z.w++; else z.c++;
+    const nx = p.x/vw, ny = p.y/vh, weed = isWeed(p.class);
+    heatPts.push({x:nx, y:ny, r:Math.max(p.width/vw, p.height/vh), weed});
+    const z = camHeat[Math.min(HR-1,Math.max(0,Math.floor(ny*HR)))*HC + Math.min(HC-1,Math.max(0,Math.floor(nx*HC)))];
+    if (weed) z.w++; else z.c++;
   });
   renderCamHeat();
 }
+
+const lerp = (a,b,t) => a + (b-a)*t;
+const mix = (c1,c2,t) => [lerp(c1[0],c2[0],t), lerp(c1[1],c2[1],t), lerp(c1[2],c2[2],t)];
+const C_BG=[5,6,15], C_COOL=[42,10,74], C_WARM=[122,26,106], C_HOT=[255,251,224];
+const C_CROP=[46,214,96], C_MIX=[255,150,40], C_WEED=[255,60,80];
+
+function buildThermal(){
+  const wf = new Float32Array(GW*GH), cf = new Float32Array(GW*GH);
+  heatPts.forEach(pt=>{
+    const f = pt.weed ? wf : cf;
+    const s = Math.max(5, pt.r*GW*0.4), s2 = 2*s*s, R = Math.ceil(s*2.5);
+    const cx = pt.x*GW, cy = pt.y*GH;
+    for (let y=Math.max(0,Math.floor(cy-R)); y<Math.min(GH,cy+R); y++)
+      for (let x=Math.max(0,Math.floor(cx-R)); x<Math.min(GW,cx+R); x++){
+        const d2 = (x-cx)**2 + (y-cy)**2; f[y*GW+x] += Math.exp(-d2/s2);
+      }
+  });
+  let max = 0; for (let i=0;i<wf.length;i++) max = Math.max(max, wf[i]+cf[i]);
+  max = Math.max(max, 1);
+  const img = fctx.createImageData(GW, GH), d = img.data;
+  for (let i=0;i<wf.length;i++){
+    const tot = wf[i]+cf[i], t = Math.pow(tot/max, 0.6);
+    const ratio = tot > 1e-4 ? wf[i]/tot : 0;
+    const hue = ratio < .5 ? mix(C_CROP, C_MIX, ratio*2) : mix(C_MIX, C_WEED, (ratio-.5)*2);
+    let col;
+    if (t < .15)      col = mix(C_BG, C_COOL, t/.15);
+    else if (t < .35) col = mix(C_COOL, mix(C_WARM, hue, .5), (t-.15)/.2);
+    else if (t < .8)  col = mix(mix(C_WARM, hue, .5), hue, (t-.35)/.45);
+    else              col = mix(hue, C_HOT, (t-.8)/.2);
+    d[i*4]=col[0]; d[i*4+1]=col[1]; d[i*4+2]=col[2]; d[i*4+3]=255;
+  }
+  fctx.putImageData(img, 0, 0);
+}
+
 function renderCamHeat(){
   let zw=0, zm=0, zc=0;
   camHeat.forEach(z=>{ const st=zoneStatus(z.w,z.c); if(st==='weed')zw++; else if(st==='mixed')zm++; else if(st==='crop')zc++; });
@@ -498,22 +536,27 @@ function renderCamHeat(){
   $('heatScans').textContent = heatScans + (heatScans===1 ? ' scan' : ' scans');
 
   const r = heatCv.getBoundingClientRect(); if (!r.width) return;
-  heatCv.width = r.width*devicePixelRatio; heatCv.height = r.height*devicePixelRatio;
-  const W = heatCv.width, H = heatCv.height, cw = W/HC, ch = H/HR;
-  hctx.fillStyle = '#000'; hctx.fillRect(0,0,W,H);
-  if (bgCv.width){ hctx.globalAlpha = .4; hctx.drawImage(bgCv,0,0,W,H); hctx.globalAlpha = 1; }
-  const max = Math.max(1, ...camHeat.map(z=>z.w+z.c));
-  hctx.font = `bold ${12*devicePixelRatio}px Inter, sans-serif`; hctx.textAlign = 'center'; hctx.textBaseline = 'middle';
-  camHeat.forEach((z,i)=>{
-    const x = (i%HC)*cw, y = Math.floor(i/HC)*ch, t = z.w + z.c;
-    if (t){
-      hctx.fillStyle = COL[zoneStatus(z.w,z.c)]; hctx.globalAlpha = .3 + .55*(t/max);
-      hctx.fillRect(x+1, y+1, cw-2, ch-2); hctx.globalAlpha = 1;
-      hctx.fillStyle = '#fff'; hctx.fillText(t, x+cw/2, y+ch/2);
-    }
-    hctx.strokeStyle = 'rgba(255,255,255,.1)'; hctx.strokeRect(x, y, cw, ch);
+  const dpr = devicePixelRatio;
+  heatCv.width = r.width*dpr; heatCv.height = r.height*dpr;
+  const W = heatCv.width, H = heatCv.height;
+  buildThermal();
+  hctx.imageSmoothingEnabled = true; hctx.imageSmoothingQuality = 'high';
+  hctx.filter = `blur(${3*dpr}px)`; hctx.drawImage(fieldCv, 0, 0, W, H); hctx.filter = 'none';
+  // scan lines
+  hctx.fillStyle = 'rgba(0,0,0,.18)';
+  for (let y=0; y<H; y+=3*dpr) hctx.fillRect(0, y, W, dpr);
+  // camera reticle & corner brackets
+  hctx.strokeStyle = 'rgba(255,255,255,.35)'; hctx.lineWidth = 1.5*dpr;
+  const L = 22*dpr, m = 12*dpr;
+  [[m,m,1,1],[W-m,m,-1,1],[m,H-m,1,-1],[W-m,H-m,-1,-1]].forEach(([x,y,sx,sy])=>{
+    hctx.beginPath(); hctx.moveTo(x, y+sy*L); hctx.lineTo(x, y); hctx.lineTo(x+sx*L, y); hctx.stroke();
   });
-  if (!heatScans){ hctx.fillStyle = '#8fa596'; hctx.fillText('Scan to build the heat map', W/2, H/2); }
+  hctx.beginPath(); hctx.moveTo(W/2-14*dpr,H/2); hctx.lineTo(W/2+14*dpr,H/2);
+  hctx.moveTo(W/2,H/2-14*dpr); hctx.lineTo(W/2,H/2+14*dpr); hctx.stroke();
+  hctx.font = `bold ${11*dpr}px Inter, sans-serif`; hctx.fillStyle = 'rgba(255,255,255,.55)';
+  hctx.textAlign = 'left'; hctx.textBaseline = 'top';
+  hctx.fillText('BIOGUARD THERMAL · ' + heatPts.length + ' DETECTIONS', m+6*dpr, m+6*dpr);
+  if (!heatScans){ hctx.textAlign='center'; hctx.textBaseline='middle'; hctx.fillText('Scan to build the heat map', W/2, H/2+30*dpr); }
 }
 $('btnHeatReset').onclick = () => { resetCamHeat(); renderCamHeat(); log('Heat map reset'); };
 try{ localStorage.removeItem('bioguard_field'); }catch(e){}
